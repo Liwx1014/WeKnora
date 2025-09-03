@@ -32,7 +32,7 @@ print(f"使用的设备: {device}")
 # 模型路径
 # 如果您将模型下载到了本地，请使用本地路径以加快加载速度
 # model_path = '/path/to/your/local/Qwen3-Reranker-4B'
-model_path = "Qwen/Qwen3-Reranker-4B"
+model_path = "/data1/home/lwx/work/Download/Qwen3-Reranker-4B"
 
 try:
     # 加载 Tokenizer 和 Model

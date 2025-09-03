@@ -30,14 +30,12 @@ COPY packages/ /app/packages/
 RUN echo "检查本地protoc安装包..." && \
     if [ -f "/app/packages/protoc-3.19.4-linux-x86_64.zip" ]; then \
         echo "发现本地protoc安装包，将进行离线安装"; \
-        # 离线安装：使用本地包（精确路径避免歧义）
         cp /app/packages/protoc-*.zip /app/ && \
         unzip -o /app/protoc-*.zip -d /usr/local && \
         chmod +x /usr/local/bin/protoc && \
         rm -f /app/protoc-*.zip; \
     else \
         echo "未发现本地protoc安装包，将进行在线安装"; \
-        # 在线安装：从网络下载
         curl -LO https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip && \
         unzip -o protoc-3.19.4-linux-x86_64.zip -d /usr/local && \
         chmod +x /usr/local/bin/protoc && \
