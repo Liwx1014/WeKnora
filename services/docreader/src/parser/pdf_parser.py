@@ -25,7 +25,7 @@ class PDFParser(BaseParser):
         iou = intersection.get_area() / union.get_area()
         return iou
 
-    def _find_tables_robustly(self, page: fitz.Page, iou_threshold: float = 0.9) -> List['fitz.Table']:
+    def _find_tables_robustly(self, page: fitz.Page, iou_threshold: float = 0.5) -> List['fitz.Table']:
         """
         使用双策略、合并去重的方式在页面上查找表格
 
@@ -37,15 +37,17 @@ class PDFParser(BaseParser):
         # 策略一: "lines_strict"
         lines_strict_settings = {
             "strategy": "lines_strict",
+   
         }
         lines_tables = page.find_tables(**lines_strict_settings)
         
-        # 策略二: "text"
+        # 策略二: "text" 三线表
         text_settings = {
             "vertical_strategy": "text",
             "horizontal_strategy": "lines",
-            "snap_tolerance": 5,
-            "min_words_vertical": 3,
+            "snap_tolerance": 5,   #对齐容差
+            "min_words_vertical": 3,#最少3个词对齐才算一列
+           
         }
         text_tables = page.find_tables(**text_settings)
         
@@ -66,23 +68,39 @@ class PDFParser(BaseParser):
         return unique_tables
 
     def _convert_table_to_markdown(self, table_data: list) -> str:
-      
+        """
+        一个更健壮的表格到 Markdown 的转换器，能够处理不规则的行（如合并单元格）。
+        """
         if not table_data or not table_data[0]: return ""
+
         def clean_cell(cell):
             if cell is None: return ""
             return str(cell).replace("\n", " <br> ")
+
         try:
-            markdown = ""
+            # --- 关键改动 2: 全新的、更健壮的 Markdown 生成逻辑 ---
             header = [clean_cell(cell) for cell in table_data[0]]
-            markdown += "| " + " | ".join(header) + " |\n"
-            markdown += "| " + " | ".join(["---"] * len(header)) + " |\n"
+            header_cols = len(header)
+            
+            markdown = "| " + " | ".join(header) + " |\n"
+            markdown += "| " + " | ".join(["---"] * header_cols) + " |\n"
+            
             for row in table_data[1:]:
                 if not row: continue
-                body_row = [clean_cell(cell) for cell in row]
-                if len(body_row) != len(header):
-                    logger.warning(f"Skipping malformed table row: {body_row}")
-                    continue
-                markdown += "| " + " | ".join(body_row) + " |\n"
+                
+                body_row_cleaned = [clean_cell(cell) for cell in row]
+                
+                # 规范化行，确保列数与表头一致
+                current_cols = len(body_row_cleaned)
+                if current_cols < header_cols:
+                    # 如果行太短（常见于合并单元格），用空字符串填充
+                    body_row_cleaned.extend([""] * (header_cols - current_cols))
+                elif current_cols > header_cols:
+                    # 如果行太长（罕见，可能由解析错误导致），则截断
+                    body_row_cleaned = body_row_cleaned[:header_cols]
+                
+                markdown += "| " + " | ".join(body_row_cleaned) + " |\n"
+                
             return markdown
         except Exception as e:
             logger.error(f"Error converting table to markdown: {e}")
