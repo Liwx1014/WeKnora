@@ -3,7 +3,7 @@ services:
     image: wechatopenai/weknora-app:latest
     container_name: WeKnora-app
     ports:
-      - "8080:8080"
+      - "10086:8080"
     volumes:
       - data-files:/data/files
       - ./config:/app/config
@@ -91,7 +91,7 @@ services:
     image: wechatopenai/weknora-ui:latest
     container_name: WeKnora-frontend
     ports:
-      - "80:80"
+      - "81:80"
     depends_on:
       - app
     networks:

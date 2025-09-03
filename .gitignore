@@ -36,3 +36,14 @@ data/files/
 ### macOS
 # General
 .DS_Store
+
+# Test outputs and temporary files
+services/docreader/src/extracted_images/
+services/docreader/src/rag.pdf
+services/docreader/src/zhidu_travel.pdf
+services/docreader/src/test_pdf_parsing.py
+
+# Downloaded packages (if they are re-downloadable via scripts)
+packages/punkt_tab.zip
+packages/wordnet.zip
+

@@ -5,11 +5,11 @@ server:
 
 # 对话服务配置
 conversation:
-  max_rounds: 5
-  keyword_threshold: 0.3
+  max_rounds: 3
+  keyword_threshold: 0.5
   embedding_top_k: 10
   vector_threshold: 0.5
-  rerank_threshold: 0.7
+  rerank_threshold: 0.5
   rerank_top_k: 5
   fallback_strategy: "fixed"
   fallback_response: "抱歉，我无法回答这个问题。"
