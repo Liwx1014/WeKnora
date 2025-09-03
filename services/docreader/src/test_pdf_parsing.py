@@ -5,7 +5,6 @@ from PIL.Image import Image as PilImage
 from types import SimpleNamespace # A simple way to create mock objects
 # 导入您项目中的 PDFParser 类
 from parser.pdf_parser import PDFParser
-# --- 配置区 ---
 # 1. 设置您想要测试的PDF文件的路径
 PDF_FILE_PATH = "/data1/home/lwx/work/Code/Experiment/WeKnora/services/docreader/src/zhidu_travel.pdf"  
 # 2. 设置一个目录来保存提取出的图像
@@ -79,6 +78,6 @@ def run_parser_test():
     print(final_text)
     print("-" * 20 + " [文本结束] " + "-" * 20)
     
-if __name__ == "__main__":
+if __name__ == "__main__": 
     setup_logging()
     run_parser_test()
