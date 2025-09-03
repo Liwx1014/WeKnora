@@ -46,4 +46,5 @@ services/docreader/src/test_pdf_parsing.py
 # Downloaded packages (if they are re-downloadable via scripts)
 packages/punkt_tab.zip
 packages/wordnet.zip
+packages/*.zip
 
