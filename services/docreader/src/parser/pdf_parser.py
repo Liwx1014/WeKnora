@@ -43,7 +43,7 @@ class PDFParser(BaseParser):
                     found_tables = page.find_tables(default_settings)
                     if not found_tables:
                         logger.info(f"Page {page_num+1}: Default strategy found no tables. Trying fallback strategy.")
-                        fallback_settings = { "vertical_strategy": "lines", "horizontal_strategy": "text" }
+                        fallback_settings = { "vertical_strategy": "text", "horizontal_strategy": "lines" }
                         found_tables = page.find_tables(fallback_settings)
 
                     table_bboxes = [table.bbox for table in found_tables]
