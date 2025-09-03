@@ -1,5 +1,5 @@
 <template>
-    <div class="chat">
+    <div class="chat tech-chat">
         <div ref="scrollContainer" class="chat_scroll_box" @scroll="handleScroll">
             <div class="msg_list">
                 <div v-for="(session, id) in messagesList" :key='id'>
@@ -17,7 +17,7 @@
                 </div>
             </div>
         </div>
-        <div style="min-height: 115px; margin: 16px auto 4px;width: 100%;max-width: 800px;">
+        <div class="input-container">
             <InputField @send-msg="sendMsg" :isReplying="isReplying"></InputField>
         </div>
     </div>
@@ -260,8 +260,9 @@ onBeforeRouteUpdate((to, from, next) => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    max-width: calc(100vw - 260px);
-    min-width: 400px;
+    width: 100%;
+    height: calc(100vh - 64px);
+    overflow: hidden;
 
     :deep(.answers-input) {
         position: static;
@@ -278,6 +279,9 @@ onBeforeRouteUpdate((to, from, next) => {
     width: 100%;
     overflow-y: auto;
     max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
 
     &::-webkit-scrollbar {
         width: 0;
@@ -290,14 +294,94 @@ onBeforeRouteUpdate((to, from, next) => {
 .msg_list {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
+    width: 100%;
     max-width: 800px;
     flex: 1;
+    padding: 20px;
+    position: relative;
 
     .botanswer_laoding_gif {
         width: 24px;
         height: 18px;
         margin-left: 16px;
     }
+}
+
+.input-container {
+    min-height: 115px;
+    margin: 16px auto 4px;
+    width: 100%;
+    max-width: 800px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+/* 科技风格聊天页面 */
+.tech-chat {
+    background: transparent;
+    position: relative;
+}
+
+.tech-chat::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 260px;
+    right: 0;
+    bottom: 0;
+    background: var(--tech-bg-pattern);
+    opacity: 0.1;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.tech-chat .chat_scroll_box {
+    background: transparent;
+    position: relative;
+}
+
+.tech-chat .chat_scroll_box::-webkit-scrollbar {
+    width: 8px;
+}
+
+.tech-chat .chat_scroll_box::-webkit-scrollbar-track {
+    background: var(--tech-bg-secondary);
+    border-radius: 4px;
+}
+
+.tech-chat .chat_scroll_box::-webkit-scrollbar-thumb {
+    background: var(--tech-primary);
+    border-radius: 4px;
+    box-shadow: 0 0 6px var(--tech-primary);
+}
+
+.tech-chat .chat_scroll_box::-webkit-scrollbar-thumb:hover {
+    background: var(--tech-accent);
+    box-shadow: 0 0 10px var(--tech-accent);
+}
+
+.tech-chat .msg_list {
+    position: relative;
+    background: rgba(0, 20, 40, 0.05);
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--tech-border);
+    box-shadow: var(--tech-shadow-card);
+    transition: all 0.3s ease;
+}
+
+
+
+.tech-chat .msg_list:hover {
+    border-color: var(--tech-border-glow);
+    box-shadow: var(--tech-shadow-glow);
+}
+
+.tech-chat .botanswer_laoding_gif {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
 }
 </style>

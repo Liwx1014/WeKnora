@@ -62,16 +62,15 @@ onBeforeRouteUpdate((to, from, next) => {
 </template>
 <style scoped lang="less">
 .answers-input {
-  position: absolute;
+  position: relative;
   z-index: 99;
-  bottom: 60px;
-  left: 50%;
-  transform: translateX(-400px);
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 :deep(.t-textarea__inner) {
-  width: 100%;
-  width: 800px;
+  width: 100% !important;
   max-height: 250px !important;
   min-height: 112px !important;
   resize: none;
@@ -131,5 +130,33 @@ onBeforeRouteUpdate((to, from, next) => {
   cursor: no-drop !important;
 }
 
+/* 科技风格输入框适配 */
+.tech-chat :deep(.t-textarea__inner) {
+  background: var(--tech-bg-card) !important;
+  border: 1px solid var(--tech-border) !important;
+  color: var(--tech-text-primary) !important;
+  box-shadow: var(--tech-shadow-card) !important;
+}
+
+.tech-chat :deep(.t-textarea__inner:focus) {
+  border: 1px solid var(--tech-primary) !important;
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2) !important;
+}
+
+.tech-chat :deep(.t-textarea__inner::placeholder) {
+  color: var(--tech-text-muted) !important;
+}
+
+.tech-chat .answers-input-source {
+  color: var(--tech-text-muted) !important;
+}
+
+.tech-chat .answers-input-send {
+  background-color: var(--tech-primary) !important;
+}
+
+.tech-chat .grey-out {
+  background-color: var(--tech-text-muted) !important;
+}
 
 </style>

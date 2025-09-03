@@ -1,11 +1,5 @@
 <template>
     <div class="initialization-container">
-        <!-- 页面标题区域 -->
-        <div class="initialization-header">
-            <h1>WeKnora 系统初始化配置</h1>
-            <p>首次使用需要配置模型和服务信息，完成后即可开始使用系统</p>
-        </div>
-        
         <!-- 页面主体两栏布局：左侧导航 + 右侧内容 -->
         <div class="init-layout">
             <!-- 左侧导航 -->
@@ -2289,12 +2283,17 @@ const detectEmbeddingDimension = async () => {
 
 <style lang="less" scoped>
 .initialization-container {
+    background: transparent;
+    padding: 0;
+    
     .init-layout {
         display: grid;
         grid-template-columns: 220px 1fr;
         gap: 24px;
         max-width: 1200px;
         margin: 0 auto;
+        height: 100%;
+        min-height: calc(100vh - 120px);
     }
 
     .sidebar {
@@ -2305,18 +2304,19 @@ const detectEmbeddingDimension = async () => {
     }
 
     .sidebar-card {
-        background: #fff;
-        border: 1px solid #e8f5e8;
-        border-radius: 14px;
-        box-shadow: 0 8px 24px rgba(7, 192, 95, 0.08);
+        background: var(--tech-bg-secondary);
+        border: 1px solid var(--tech-border);
+        border-radius: 12px;
+        box-shadow: var(--tech-shadow-lg);
         padding: 16px 12px;
+        backdrop-filter: blur(10px);
     }
 
     .nav-title {
         font-weight: 600;
-        color: #2c5234;
+        color: var(--tech-text-primary);
         padding: 8px 10px 12px;
-        border-bottom: 2px solid #f0fdf4;
+        border-bottom: 2px solid var(--tech-border-light);
         margin-bottom: 12px;
         font-size: 15px;
     }
@@ -2335,25 +2335,28 @@ const detectEmbeddingDimension = async () => {
         display: flex;
         align-items: center;
         gap: 8px;
-        color: #6b7280;
+        color: var(--tech-text-secondary);
         padding: 10px 12px;
-        border-radius: 10px;
+        border-radius: 8px;
         transition: all 0.2s ease;
         font-size: 14px;
         font-weight: 500;
+        border: 1px solid transparent;
     }
 
     .nav-item:hover {
-        background: #f0fdf4;
-        color: #166534;
+        background: var(--tech-bg-hover);
+        color: var(--tech-text-primary);
+        border-color: var(--tech-primary);
         transform: translateX(2px);
     }
 
     .nav-item.active {
-        background: linear-gradient(135deg, #07c05f, #00a651);
-        color: white;
+        background: var(--tech-gradient-button);
+        color: #ffffff;
         font-weight: 600;
-        box-shadow: 0 4px 12px rgba(7, 192, 95, 0.2);
+        box-shadow: var(--tech-shadow-glow);
+        border-color: var(--tech-primary);
         transform: translateX(2px);
     }
 
@@ -2366,21 +2369,51 @@ const detectEmbeddingDimension = async () => {
     }
     
     .nav-item.active .dot {
-        background: white;
+        background: #ffffff;
         box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
     }
 
     .init-main { 
         min-width: 0; 
         max-width: 960px;
+        background: var(--tech-bg-secondary);
+        border-radius: 12px;
+        border: 1px solid var(--tech-border);
+        box-shadow: var(--tech-shadow-lg);
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 20px;
+        backdrop-filter: blur(10px);
+        max-height: calc(100vh - 140px);
+        
+        /* 自定义滚动条样式 */
+        &::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        &::-webkit-scrollbar-track {
+            background: var(--tech-bg-tertiary);
+            border-radius: 4px;
+        }
+        
+        &::-webkit-scrollbar-thumb {
+            background: var(--tech-primary);
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+        
+        &::-webkit-scrollbar-thumb:hover {
+            background: var(--tech-accent);
+        }
     }
+    
     .ollama-summary-card {
         max-width: 100%;
         margin: 0 0 16px 0;
-        background: #ffffff;
-        border: 1px solid #e9edf5;
+        background: var(--tech-bg-tertiary);
+        border: 1px solid var(--tech-border-light);
         border-radius: 12px;
-        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+        box-shadow: var(--tech-shadow-md);
         padding: 14px 16px;
 
         .summary-header {
@@ -2394,16 +2427,16 @@ const detectEmbeddingDimension = async () => {
                 align-items: center;
                 gap: 6px;
                 font-weight: 600;
-                color: #1f2937;
+                color: var(--tech-text-primary);
             }
             .state{ margin-left: 4px; }
             .refresh-icon{
                 margin-left: 4px;
                 cursor: pointer;
-                color: #6b7280;
+                color: var(--tech-text-secondary);
                 transition: transform .2s ease, color .2s ease;
             }
-            .refresh-icon:hover{ color: #0ea5e9; }
+            .refresh-icon:hover{ color: var(--tech-accent); }
             .refresh-icon.spinning{ animation: spin 1s linear infinite; }
         }
 
@@ -2412,10 +2445,10 @@ const detectEmbeddingDimension = async () => {
                 display: flex;
                 align-items: flex-start;
                 gap: 10px;
-                .label { color:#6b7280; font-size: 12px; margin-top: 2px; }
+                .label { color: var(--tech-text-secondary); font-size: 12px; margin-top: 2px; }
                 .model-list { display: flex; gap: 6px; flex-wrap: wrap; }
                 .model-pill { border-radius: 10px; }
-                .empty { color:#9ca3af; font-size:12px; }
+                .empty { color: var(--tech-text-muted); font-size:12px; }
             }
         }
     }
@@ -2464,16 +2497,16 @@ const detectEmbeddingDimension = async () => {
         /* 表单容器卡片化：更宽一点、更浅的阴影与细边框 */
         max-width: 100%;
         margin: 0;
-        background: #fff;
+        background: var(--tech-bg-primary);
         padding: 32px 36px;
         border-radius: 14px;
-        border: 1px solid #e9edf5;
-        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+        border: 1px solid var(--tech-border);
+        box-shadow: var(--tech-shadow-lg);
     }
     
     .config-section {
         margin-bottom: 32px;
-        border-bottom: 1px solid #eef2f7;
+        border-bottom: 1px solid var(--tech-border-light);
         padding-bottom: 24px;
         
         &:last-of-type {
@@ -2482,7 +2515,7 @@ const detectEmbeddingDimension = async () => {
         }
         
         h3 {
-            color: #07c05f;
+            color: var(--tech-primary);
             font-size: 18px;
             font-weight: 600;
             margin-bottom: 16px;
@@ -2490,41 +2523,41 @@ const detectEmbeddingDimension = async () => {
             align-items: center;
             padding: 10px 16px;
             /* 标题条更清爽的浅色渐变 */
-            background: linear-gradient(90deg, #f6f9ff, #f4fff6);
+            background: var(--tech-bg-secondary);
             border-radius: 10px;
-            border-left: 4px solid #07c05f;
+            border-left: 4px solid var(--tech-primary);
             
             .section-icon {
                 margin-right: 8px;
-                color: #07c05f;
+                color: var(--tech-primary);
                 font-size: 20px;
             }
         }
         
         h4 {
-            color: #333;
+            color: var(--tech-text-primary);
             font-size: 16px;
             font-weight: 500;
             margin: 20px 0 15px 0;
             padding-left: 12px;
-            border-left: 3px solid #07c05f;
+            border-left: 3px solid var(--tech-primary);
         }
     }
     
     .remote-config, .multimodal-config, .rerank-config {
         margin-top: 16px;
         padding: 18px 16px;
-        background: #f9fcff;
+        background: var(--tech-bg-secondary);
         border-radius: 12px;
-        border: 1px solid #edf2f7;
+        border: 1px solid var(--tech-border-light);
     }
     
     .ollama-status {
         margin-top: 15px;
         padding: 15px;
-        background: #f0faf0;
+        background: var(--tech-bg-tertiary);
         border-radius: 8px;
-        border-left: 4px solid #52c41a;
+        border-left: 4px solid var(--tech-success);
         
         .status-item {
             display: flex;
@@ -2546,7 +2579,7 @@ const detectEmbeddingDimension = async () => {
                     font-weight: 500;
                     margin-right: 10px;
                     min-width: 120px;
-                    color: #333;
+                    color: var(--tech-text-primary);
                 }
                 
                 :deep(.t-tag) {
@@ -2569,11 +2602,11 @@ const detectEmbeddingDimension = async () => {
                     margin-bottom: 5px;
                     border-radius: 10px;
                     &.t-button--theme-primary {
-                        background-color: #07c05f;
-                        border-color: #07c05f;
+                        background-color: var(--tech-primary);
+                        border-color: var(--tech-primary);
                         &:hover {
-                            background-color: #00a651;
-                            border-color: #00a651;
+                            background-color: var(--tech-accent);
+                            border-color: var(--tech-accent);
                         }
                     }
                 }
@@ -2587,7 +2620,7 @@ const detectEmbeddingDimension = async () => {
                 
                 .progress-text {
                     font-size: 12px;
-                    color: #666;
+                    color: var(--tech-text-secondary);
                     margin-top: 4px;
                     display: block;
                 }
@@ -2615,23 +2648,23 @@ const detectEmbeddingDimension = async () => {
             transition: all 0.3s ease;
             
             &.t-tag--success {
-                background-color: #f6ffed;
-                border-color: #b7eb8f;
-                color: #52c41a;
+                background-color: var(--tech-bg-success);
+                border-color: var(--tech-success);
+                color: var(--tech-success);
                 animation: statusFadeIn 0.5s ease;
             }
             
             &.t-tag--danger {
-                background-color: #fff2f0;
-                border-color: #ffccc7;
-                color: #ff4d4f;
+                background-color: var(--tech-bg-error);
+                border-color: var(--tech-error);
+                color: var(--tech-error);
                 animation: statusFadeIn 0.5s ease;
             }
             
             &.t-tag--default {
-                background-color: #fafafa;
-                border-color: #d9d9d9;
-                color: #666;
+                background-color: var(--tech-bg-secondary);
+                border-color: var(--tech-border);
+                color: var(--tech-text-secondary);
             }
             
             .t-icon {
@@ -2650,11 +2683,11 @@ const detectEmbeddingDimension = async () => {
             transition: all 0.3s ease;
             
             &.t-button--theme-primary {
-                color: #1890ff;
+                color: var(--tech-primary);
                 
                 &:hover {
-                    color: #40a9ff;
-                    background-color: #eef6ff;
+                    color: var(--tech-accent);
+                    background-color: var(--tech-bg-hover);
                 }
             }
         }
@@ -2663,11 +2696,11 @@ const detectEmbeddingDimension = async () => {
             width: 100%;
             margin-top: 8px;
             padding: 8px 12px;
-            background: #fff2f0;
+            background: var(--tech-bg-error);
             border-radius: 6px;
-            border-left: 3px solid #ff4d4f;
+            border-left: 3px solid var(--tech-error);
             font-size: 12px;
-            color: #ff4d4f;
+            color: var(--tech-error);
             display: flex;
             align-items: flex-start;
             gap: 6px;
@@ -2676,7 +2709,7 @@ const detectEmbeddingDimension = async () => {
             
             .t-icon {
                 font-size: 14px;
-                color: #ff4d4f;
+                color: var(--tech-error);
                 margin-top: 1px;
                 flex-shrink: 0;
             }
@@ -2720,7 +2753,7 @@ const detectEmbeddingDimension = async () => {
         padding-top: 20px;
         
         :deep(.t-button--theme-primary) {
-            background: linear-gradient(135deg, #07c05f, #00a651);
+            background: var(--tech-gradient-button);
             border: none;
             border-radius: 12px;
             font-weight: 600;
@@ -2729,39 +2762,43 @@ const detectEmbeddingDimension = async () => {
             transition: all 0.2s ease;
             min-height: 48px;
             min-width: 160px;
+            color: #ffffff;
             
             &:hover:not(.t-is-disabled) {
-                background: linear-gradient(135deg, #00a651, #009645);
-                box-shadow: 0 8px 25px rgba(7, 192, 95, 0.3);
+                background: var(--tech-gradient-button-hover);
+                box-shadow: var(--tech-shadow-glow);
+                transform: translateY(-1px);
             }
             
             &:active:not(.t-is-disabled) {
                 transform: translateY(0);
-                box-shadow: 0 4px 15px rgba(7, 192, 95, 0.2);
+                box-shadow: var(--tech-shadow-md);
             }
             
             &.t-is-disabled {
-                background: #ccc;
-                color: #999;
+                background: var(--tech-bg-disabled);
+                color: var(--tech-text-disabled);
                 transform: none;
                 box-shadow: none;
             }
             
             &.t-is-loading {
-                background: linear-gradient(135deg, #07c05f, #00a651);
-                color: white;
+                background: var(--tech-gradient-button);
+                color: #ffffff;
                 transform: none;
-                box-shadow: 0 4px 15px rgba(7, 192, 95, 0.2);
+                box-shadow: var(--tech-shadow-md);
             }
         }
         
         :deep(.t-button--theme-default) {
-            border-color: #d9d9d9;
-            color: #666;
+            border-color: var(--tech-border);
+            color: var(--tech-text-secondary);
+            background: var(--tech-bg-secondary);
             
             &:hover {
-                border-color: #07c05f;
-                color: #07c05f;
+                border-color: var(--tech-accent);
+                color: var(--tech-accent);
+                background: var(--tech-bg-hover);
             }
         }
         
@@ -2770,7 +2807,7 @@ const detectEmbeddingDimension = async () => {
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #fa8c16;
+            color: var(--tech-warning);
             font-size: 14px;
             
             .tip-icon {
@@ -2785,7 +2822,7 @@ const detectEmbeddingDimension = async () => {
     
     :deep(.t-form-item__label) {
         font-weight: 500;
-        color: #333;
+        color: var(--tech-text-primary);
         font-size: 14px;
     }
     
@@ -2793,13 +2830,45 @@ const detectEmbeddingDimension = async () => {
         width: 100%;
         
         .t-input__inner {
-            border-radius: 6px;
+            border-radius: 8px;
             transition: all 0.3s ease;
+            background: var(--tech-bg-tertiary);
+            border-color: var(--tech-border-light);
+            color: var(--tech-text-primary);
             
             &:focus {
-                border-color: #07c05f;
-                box-shadow: 0 0 0 2px rgba(7, 192, 95, 0.2);
+                border-color: var(--tech-primary);
+                box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+                background: var(--tech-bg-secondary);
             }
+            
+            &:hover {
+                border-color: var(--tech-primary);
+            }
+        }
+    }
+    
+    /* 普通radio组件样式 */
+    :deep(.t-radio) {
+        color: var(--tech-text-primary);
+        
+        .t-radio__input {
+            border-color: var(--tech-border);
+            
+            &:hover {
+                border-color: var(--tech-primary);
+            }
+        }
+        
+        &.t-is-checked {
+            .t-radio__input {
+                background-color: var(--tech-primary);
+                border-color: var(--tech-primary);
+            }
+        }
+        
+        .t-radio__label {
+            color: var(--tech-text-primary);
         }
     }
 
@@ -2828,17 +2897,17 @@ const detectEmbeddingDimension = async () => {
     
     :deep(.t-radio-button) {
         .t-radio-button__inner {
-            border-color: #d9d9d9;
+            border-color: var(--tech-border);
             
             &:hover {
-                border-color: #07c05f;
-                color: #07c05f;
+                border-color: var(--tech-primary);
+                color: var(--tech-primary);
             }
         }
         
         &.t-is-checked .t-radio-button__inner {
-            background-color: #07c05f;
-            border-color: #07c05f;
+            background-color: var(--tech-primary);
+            border-color: var(--tech-primary);
             color: white;
         }
     }
@@ -2852,7 +2921,7 @@ const detectEmbeddingDimension = async () => {
     
     .form-tip {
         font-size: 12px;
-        color: #888;
+        color: var(--tech-text-secondary);
         margin-top: 4px;
         line-height: 1.4;
     }
@@ -2889,25 +2958,25 @@ const detectEmbeddingDimension = async () => {
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, #07c05f, #00a651);
+        background: var(--tech-gradient-button);
         border: none;
         color: white;
         transition: all 0.2s ease;
-        box-shadow: 0 2px 8px rgba(7, 192, 95, 0.2);
+        box-shadow: var(--tech-shadow-sm);
         
         &:hover:not(:disabled) {
-            background: linear-gradient(135deg, #00a651, #008f47);
-            box-shadow: 0 4px 12px rgba(7, 192, 95, 0.3);
+            background: var(--tech-gradient-button-hover);
+            box-shadow: var(--tech-shadow-glow);
         }
         
         &:active:not(:disabled) {
             transform: translateY(0);
-            box-shadow: 0 2px 6px rgba(7, 192, 95, 0.2);
+            box-shadow: var(--tech-shadow-sm);
         }
         
         &:disabled {
-            background: #e5e7eb;
-            color: #9ca3af;
+            background: var(--tech-bg-disabled);
+            color: var(--tech-text-disabled);
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
@@ -2923,10 +2992,10 @@ const detectEmbeddingDimension = async () => {
         margin-top: 8px;
         margin-bottom: 8px;
         padding: 10px 12px;
-        background: linear-gradient(135deg, #f0fdf4, #f8fafc);
+        background: var(--tech-bg-tertiary);
         border-radius: 8px;
-        border: 1px solid #dcfce7;
-        box-shadow: 0 1px 4px rgba(7, 192, 95, 0.08);
+        border: 1px solid var(--tech-border-light);
+        box-shadow: var(--tech-shadow-sm);
         width: 100%;
         
         .progress-info {
@@ -2936,14 +3005,14 @@ const detectEmbeddingDimension = async () => {
             margin-bottom: 6px;
             
             .loading-icon {
-                color: #07c05f;
+                color: var(--tech-primary);
                 font-size: 14px;
                 animation: spin 1s linear infinite;
             }
             
             .progress-text {
                 font-size: 12px;
-                color: #166534;
+                color: var(--tech-text-primary);
                 font-weight: 600;
             }
         }
@@ -2952,14 +3021,14 @@ const detectEmbeddingDimension = async () => {
             margin-bottom: 4px;
             
             :deep(.t-progress__bar) {
-                background: linear-gradient(90deg, #07c05f, #00a651);
+                background: var(--tech-gradient-button);
                 border-radius: 4px;
                 height: 4px;
-                box-shadow: 0 1px 2px rgba(7, 192, 95, 0.2);
+                box-shadow: var(--tech-shadow-sm);
             }
             
             :deep(.t-progress__track) {
-                background-color: #e5e7eb;
+                background-color: var(--tech-bg-disabled);
                 border-radius: 4px;
                 height: 4px;
             }
@@ -2967,7 +3036,7 @@ const detectEmbeddingDimension = async () => {
         
         .progress-message {
             font-size: 10px;
-            color: #6b7280;
+            color: var(--tech-text-secondary);
             text-align: center;
             line-height: 1.2;
             font-style: italic;
@@ -3021,27 +3090,27 @@ const detectEmbeddingDimension = async () => {
     .check-action .input-icon {
         font-size: 18px;
         cursor: help;
-        color: #666;
+        color: var(--tech-text-secondary);
     }
     
     .check-action .status-icon.installed,
     .check-action .input-icon.installed {
-        color: #00a870;
+        color: var(--tech-success);
     }
     
     .check-action .status-icon.not-installed,
     .check-action .input-icon.not-installed {
-        color: #e34d59;
+        color: var(--tech-error);
     }
     
     .check-action .status-icon.unknown,
     .check-action .input-icon.unknown {
-        color: #d54941;
+        color: var(--tech-error);
     }
     
     .check-action .status-icon.checking,
     .check-action .input-icon.checking {
-        color: #0052d9;
+        color: var(--tech-primary);
     }
     
     /* 错误信息样式 */
@@ -3051,14 +3120,14 @@ const detectEmbeddingDimension = async () => {
         gap: 8px;
         margin-top: 8px;
         padding: 8px 12px;
-        background-color: #fff2f0;
-        border: 1px solid #ffccc7;
+        background-color: var(--tech-bg-error);
+        border: 1px solid var(--tech-error);
         border-radius: 6px;
-        color: #d4380d;
+        color: var(--tech-error);
         font-size: 13px;
         
         .t-icon {
-            color: #d4380d;
+            color: var(--tech-error);
             font-size: 16px;
             flex-shrink: 0;
         }
@@ -3073,8 +3142,8 @@ const detectEmbeddingDimension = async () => {
         border-radius: 8px;
         
         &.t-is-focused {
-            border-color: #07c05f;
-            box-shadow: 0 0 0 2px rgba(7, 192, 95, 0.1);
+            border-color: var(--tech-primary);
+            box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
         }
         
         .t-input__inner {
@@ -3082,13 +3151,13 @@ const detectEmbeddingDimension = async () => {
             transition: all 0.2s ease;
             
             &:focus {
-                border-color: #07c05f;
+                border-color: var(--tech-primary);
                 box-shadow: none;
                 outline: none;
             }
             
             &:hover {
-                border-color: #07c05f;
+                border-color: var(--tech-primary);
             }
         }
     }
@@ -3097,23 +3166,23 @@ const detectEmbeddingDimension = async () => {
         border-radius: 8px;
         
         &.t-is-focused {
-            border-color: #07c05f;
-            box-shadow: 0 0 0 2px rgba(7, 192, 95, 0.1);
+            border-color: var(--tech-primary);
+            box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
         }
         
         .t-textarea__inner {
             border-radius: 8px;
-            border: 1px solid #dcdcdc;
+            border: 1px solid var(--tech-border);
             transition: all 0.2s ease;
             
             &:focus {
-                border-color: #07c05f;
+                border-color: var(--tech-primary);
                 box-shadow: none;
                 outline: none;
             }
             
             &:hover {
-                border-color: #07c05f;
+                border-color: var(--tech-primary);
             }
         }
     }
@@ -3132,19 +3201,19 @@ const detectEmbeddingDimension = async () => {
     }
     
     .model-status-icon .status-icon.installed {
-        color: #00a870;
+        color: var(--tech-success);
     }
     
     .model-status-icon .status-icon.not-installed {
-        color: #e34d59;
+        color: var(--tech-error);
     }
     
     .model-status-icon .status-icon.unknown {
-        color: #d54941;
+        color: var(--tech-error);
     }
     
     .model-status-icon .status-icon.downloading {
-        color: #0052d9;
+        color: var(--tech-primary);
     }
 
     /* 紧随输入框的精简状态行 */
@@ -3245,25 +3314,25 @@ const detectEmbeddingDimension = async () => {
             gap: 15px;
             
             :deep(.t-radio) {
-                border: 2px solid #e8f5e8;
+                border: 2px solid var(--tech-border-light);
                 border-radius: 8px;
                 padding: 15px;
                 transition: all 0.3s ease;
                 cursor: pointer;
-                background: white;
+                background: var(--tech-bg-secondary);
                 
                 &:hover {
-                    border-color: #07c05f;
-                    background-color: #f8fdf8;
-                    box-shadow: 0 4px 12px rgba(7, 192, 95, 0.1);
+                    border-color: var(--tech-primary);
+                    background-color: var(--tech-bg-hover);
+                    box-shadow: var(--tech-shadow-sm);
                 }
                 
                 &.t-is-checked {
-                    border-color: #07c05f;
-                    background: linear-gradient(135deg, #07c05f, #00a651);
+                    border-color: var(--tech-primary);
+                    background: var(--tech-gradient-button);
                     color: white;
                     transform: translateY(-2px);
-                    box-shadow: 0 6px 20px rgba(7, 192, 95, 0.2);
+                    box-shadow: var(--tech-shadow-glow);
                     
                     .preset-title {
                         color: white !important;
@@ -3284,13 +3353,13 @@ const detectEmbeddingDimension = async () => {
                 .preset-title {
                     font-weight: 600;
                     font-size: 14px;
-                    color: #333;
+                    color: var(--tech-text-primary);
                     margin-bottom: 4px;
                 }
                 
                 .preset-desc {
                     font-size: 12px;
-                    color: #666;
+                    color: var(--tech-text-secondary);
                     line-height: 1.4;
                 }
             }
@@ -3458,9 +3527,9 @@ const detectEmbeddingDimension = async () => {
             text-align: center;
             margin-top: 16px;
             padding: 12px 20px;
-            background: #f8fff9;
+            background: var(--td-bg-color-container-hover);
             border-radius: 8px;
-            border: 1px solid #e8f5e8;
+            border: 1px solid var(--td-component-border);
             
             .t-button {
                 min-width: 100px;
@@ -3471,19 +3540,19 @@ const detectEmbeddingDimension = async () => {
         }
         
         .test-result {
-            background: white;
+            background: var(--td-bg-color-container);
             border-radius: 10px;
             padding: 20px;
-            border: 1px solid #e8f5e8;
-            box-shadow: 0 2px 8px rgba(7, 192, 95, 0.08);
+            border: 1px solid var(--td-component-border);
+            box-shadow: 0 2px 8px var(--td-shadow-1);
             
             h6 {
                 font-size: 15px;
                 margin-bottom: 16px;
-                color: #07c05f;
+                color: var(--td-brand-color);
                 font-weight: 600;
                 padding-bottom: 8px;
-                border-bottom: 2px solid #f0fdf4;
+                border-bottom: 2px solid var(--td-bg-color-container-hover);
             }
             
             .result-item {
@@ -3498,14 +3567,14 @@ const detectEmbeddingDimension = async () => {
                 }
                 
                 .result-text {
-                    background: #f8fff9;
+                    background: var(--td-bg-color-container-hover);
                     padding: 12px 16px;
                     border-radius: 8px;
-                    color: #333;
+                    color: var(--td-text-color-primary);
                     white-space: pre-wrap;
                     max-height: 120px;
                     overflow-y: auto;
-                    border: 1px solid #e8f5e8;
+                    border: 1px solid var(--td-component-border);
                     font-size: 13px;
                     line-height: 1.5;
                 }
@@ -3513,13 +3582,13 @@ const detectEmbeddingDimension = async () => {
             
             .result-time {
                 text-align: right;
-                color: #6b7280;
+                color: var(--td-text-color-secondary);
                 font-size: 12px;
                 margin-top: 12px;
                 padding: 8px 12px;
-                background: #f8f9fa;
+                background: var(--td-bg-color-container-hover);
                 border-radius: 6px;
-                border: 1px solid #e9ecef;
+                border: 1px solid var(--td-component-border);
             }
             
             .result-error {
@@ -3540,4 +3609,23 @@ const detectEmbeddingDimension = async () => {
         }
     }
 }
-</style> 
+
+/* Tooltip 全局样式优化 */
+:deep(.t-tooltip__content) {
+    background-color: var(--tech-bg-primary) !important;
+    color: var(--tech-text-primary) !important;
+    border: 1px solid var(--tech-border) !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+    box-shadow: var(--tech-shadow-md) !important;
+    z-index: 9999 !important;
+}
+
+:deep(.t-tooltip__arrow) {
+    border-top-color: var(--tech-bg-primary) !important;
+    border-bottom-color: var(--tech-bg-primary) !important;
+    border-left-color: var(--tech-bg-primary) !important;
+    border-right-color: var(--tech-bg-primary) !important;
+}
+</style>

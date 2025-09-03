@@ -44,7 +44,7 @@ renderer.image = function (href, title, text) {
             </figure>`;
 };
 const props = defineProps(["visible", "details"]);
-const emit = defineEmits(["closeDoc", "getDoc"]);
+const emit = defineEmits(["closeDoc", "getDoc", "deleteDoc"]);
 watch(() => props.details.md, (newVal) => {
   nextTick(async () => {
     const images = mdContentWrap.value.querySelectorAll('img.markdown-image');
@@ -82,6 +82,11 @@ const closePreImg = () => {
 const handleClose = () => {
   emit("closeDoc", false);
   doc.scrollTop = 0;
+};
+
+const handleDelete = () => {
+  emit("deleteDoc", props.details);
+  emit("closeDoc", false);
 };
 const downloadFile = () => {
   downKnowledgeDetails(props.details.id)
@@ -143,8 +148,7 @@ const handleDetailsScroll = () => {
         <div class="md-content" v-html="processMarkdown(item.content)"></div>
       </div>
       <template #footer>
-        <t-button @click="handleClose">确定</t-button>
-        <t-button theme="default" @click="handleClose">取消</t-button>
+        <t-button theme="danger" @click="handleDelete">删除</t-button>
       </template>
     </t-drawer>
     <picturePreview :reviewImg="reviewImg" :reviewUrl="reviewUrl" @closePreImg="closePreImg"></picturePreview>
@@ -186,6 +190,11 @@ const handleDetailsScroll = () => {
   margin-bottom: 8px;
 }
 
+/* 确保标签文字在科技主题下清晰可见 */
+:root[theme-mode="tech-dark"] .label {
+  color: var(--tech-text-primary) !important;
+}
+
 .download_box {
   display: flex;
   align-items: center;
@@ -201,6 +210,14 @@ const handleDetailsScroll = () => {
   background: #30323605;
   word-break: break-all;
   text-align: justify;
+  color: #000000e6;
+}
+
+/* 确保文档标题在科技主题下清晰可见 */
+:root[theme-mode="tech-dark"] .doc_t {
+  color: var(--tech-text-primary) !important;
+  background: var(--tech-bg-secondary) !important;
+  border-color: var(--tech-border) !important;
 }
 
 .icon_box {
@@ -232,11 +249,40 @@ const handleDetailsScroll = () => {
   line-height: 20px;
 }
 
+/* 确保时间文字在科技主题下清晰可见 */
+:root[theme-mode="tech-dark"] .time {
+  color: var(--tech-text-secondary) !important;
+}
+
 .no_content {
   margin-top: 12px;
   color: #00000066;
   font-size: 12px;
   padding: 16px;
   background: #fbfbfb;
+}
+
+/* 科技风格文档内容适配 */
+:root[theme-mode="tech-dark"] .doc-content {
+  background: var(--tech-bg-card) !important;
+  border: 1px solid var(--tech-border);
+  box-shadow: var(--tech-shadow-card);
+
+  .content_header {
+    color: var(--tech-text-primary);
+  }
+
+  .time {
+    color: var(--tech-text-muted) !important;
+  }
+
+  .no_content {
+    color: var(--tech-text-muted) !important;
+    background: var(--tech-bg-secondary) !important;
+  }
+
+  .doc-content-text {
+    color: var(--tech-text-primary) !important;
+  }
 }
 </style>

@@ -5,7 +5,8 @@ import { defineStore } from 'pinia';
 export const useMenuStore = defineStore('menuStore', {
     state: () => ({
         menuArr: reactive([
-            { title: '知识库', icon: 'zhishiku', path: 'knowledgeBase' },
+            { title: '首页', icon: 'home', path: 'home' },
+            { title: '知识', icon: 'zhishiku', path: 'knowledgeBase' },
             {
                 title: '对话',
                 icon: 'prefixIcon',
@@ -13,7 +14,7 @@ export const useMenuStore = defineStore('menuStore', {
                 childrenPath: 'chat',
                 children: reactive<object[]>([]),
             },
-            { title: '系统设置', icon: 'setting', path: 'settings' }
+            { title: '设置', icon: 'setting', path: 'settings' }
         ]),
         isFirstSession: false,
         firstQuery: ''
@@ -21,16 +22,16 @@ export const useMenuStore = defineStore('menuStore', {
     ),
     actions: {
         clearMenuArr() {
-            this.menuArr[1].children = reactive<object[]>([]);
+            this.menuArr[2].children = reactive<object[]>([]);
         },
         updatemenuArr(obj: any) {
-            this.menuArr[1].children?.push(obj);
+            this.menuArr[2].children?.push(obj);
         },
         updataMenuChildren(item: object) {
-            this.menuArr[1].children?.unshift(item)
+            this.menuArr[2].children?.unshift(item)
         },
         updatasessionTitle(session_id: string, title: string) {
-            this.menuArr[1].children?.forEach(item => {
+            this.menuArr[2].children?.forEach(item => {
                 if (item.id == session_id) {
                     item.title = title;
                     item.isNoTitle = false;

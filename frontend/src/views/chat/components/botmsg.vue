@@ -1,5 +1,5 @@
 <template>
-    <div class="bot_msg">
+    <div class="bot_msg tech-bot-msg">
         <div style="display: flex;flex-direction: column; gap:8px">
             <docInfo :session="session"></docInfo>
             <deepThink :deepSession="session" v-if="session.showThink"></deepThink>
@@ -241,6 +241,149 @@ onMounted(async () => {
 
 :deep(.t-loading__gradient-conic) {
     background: conic-gradient(from 90deg at 50% 50%, #fff 0deg, #676767 360deg) !important;
+}
 
+/* 科技风格机器人消息 */
+.tech-bot-msg {
+    background: var(--tech-gradient-card) !important;
+    border: 1px solid var(--tech-border);
+    border-radius: 12px;
+    color: var(--tech-text-primary) !important;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--tech-shadow-card);
+    transition: all 0.3s ease;
+    animation: slideInLeft 0.5s ease-out;
+}
+
+.tech-bot-msg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--tech-gradient-accent);
+    opacity: 0.6;
+    animation: pulse 2s infinite;
+}
+
+.tech-bot-msg::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    background: linear-gradient(45deg, transparent, var(--tech-primary), transparent);
+    border-radius: 13px;
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.3s ease;
+}
+
+.tech-bot-msg:hover {
+    border-color: var(--tech-border-glow);
+    box-shadow: var(--tech-shadow-glow);
+    transform: translateY(-2px);
+}
+
+.tech-bot-msg:hover::after {
+    opacity: 0.2;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+.tech-bot-msg .ai-markdown-img {
+    border: 1px solid var(--tech-border);
+    border-radius: 12px;
+    box-shadow: var(--tech-shadow-card);
+    transition: all 0.3s ease;
+}
+
+.tech-bot-msg .ai-markdown-img:hover {
+    border-color: var(--tech-primary);
+    box-shadow: var(--tech-shadow-glow);
+    transform: scale(1.02);
+}
+
+.tech-bot-msg .img_loading {
+    background: var(--tech-bg-secondary);
+    border: 1px solid var(--tech-border);
+    color: var(--tech-text-muted);
+    border-radius: 12px;
+}
+
+.tech-bot-msg .botanswer_laoding_gif {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+}
+
+.tech-bot-msg :deep(.ai-markdown-template) {
+    color: var(--tech-text-primary);
+}
+
+.tech-bot-msg :deep(.ai-markdown-template h1),
+.tech-bot-msg :deep(.ai-markdown-template h2),
+.tech-bot-msg :deep(.ai-markdown-template h3),
+.tech-bot-msg :deep(.ai-markdown-template h4) {
+    color: var(--tech-primary);
+    text-shadow: 0 0 4px var(--tech-primary);
+}
+
+.tech-bot-msg :deep(.ai-markdown-template code) {
+    background: var(--tech-bg-secondary);
+    color: var(--tech-accent);
+    border: 1px solid var(--tech-border);
+    border-radius: 4px;
+    padding: 2px 6px;
+}
+
+.tech-bot-msg :deep(.ai-markdown-template pre) {
+    background: var(--tech-bg-secondary);
+    border: 1px solid var(--tech-border);
+    border-radius: 8px;
+    box-shadow: var(--tech-shadow-card);
+}
+
+.tech-bot-msg :deep(.ai-markdown-template blockquote) {
+    border-left: 3px solid var(--tech-primary);
+    background: var(--tech-bg-secondary);
+    color: var(--tech-text-secondary);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.1);
+}
+
+.tech-bot-msg :deep(.ai-markdown-template a) {
+    color: var(--tech-primary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.tech-bot-msg :deep(.ai-markdown-template a:hover) {
+    color: var(--tech-accent);
+    text-shadow: 0 0 4px var(--tech-accent);
+}
+
+.tech-bot-msg :deep(.t-loading__gradient-conic) {
+    background: conic-gradient(from 90deg at 50% 50%, var(--tech-primary) 0deg, var(--tech-accent) 360deg) !important;
 }
 </style>

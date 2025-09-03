@@ -1,49 +1,48 @@
 <template>
-    <div class="aside_box">
+    <div class="header_box tech-header">
         <div class="logo_box">
-            <img class="logo" src="@/assets/img/weknora.png" alt="">
+            <span class="logo_text">灵枢智联·安巡（LineAegis）：云边一体的智能巡检与风险处置引擎</span>
         </div>
-        <div class="menu_box" v-for="(item, index) in menuArr" :key="index">
-            <div @click="gotopage(item.path)"
-                @mouseenter="mouseenteMenu(item.path)" @mouseleave="mouseleaveMenu(item.path)"
-                :class="['menu_item', item.childrenPath && item.childrenPath == currentpath ? 'menu_item_c_active' : item.path == currentpath ? 'menu_item_active' : '']">
-                <div class="menu_item-box">
-                    <div class="menu_icon">
-                        <img class="icon" :src="getImgSrc(item.icon == 'zhishiku' ? knowledgeIcon : item.icon == 'setting' ? settingIcon : prefixIcon)" alt="">
-                    </div>
-                    <span class="menu_title">{{ item.title }}</span>
-                </div>
-                <t-popup overlayInnerClassName="upload-popup" class="placement top center" content="上传知识"
-                    placement="top" show-arrow destroy-on-close>
-                    <div class="upload-file-wrap" @click="uploadFile" variant="outline"
-                        v-if="item.path == 'knowledgeBase'">
-                        <img class="upload-file-icon" :class="[item.path == currentpath ? 'active-upload' : '']"
-                            :src="getImgSrc(fileAddIcon)" alt="">
-                    </div>
-                </t-popup>
-            </div>
-            <div ref="submenuscrollContainer" @scroll="handleScroll" class="submenu" v-if="item.children">
-                <div class="submenu_item_p" v-for="(subitem, subindex) in item.children" :key="subindex"
-                    @click="gotopage(subitem.path)">
-                    <div :class="['submenu_item', currentSecondpath == subitem.path ? 'submenu_item_active' : '']"
-                        @mouseenter="mouseenteBotDownr(subindex)" @mouseleave="mouseleaveBotDown">
-                        <i v-if="currentSecondpath == subitem.path" class="dot"></i>
-                        <span class="submenu_title"
-                            :style="currentSecondpath == subitem.path ? 'margin-left:14px;max-width:160px;' : 'margin-left:18px;max-width:173px;'">
-                            {{ subitem.title }}
-                        </span>
-                        <t-popup v-model:visible="subitem.isMore" @overlay-click="delCard(subindex, subitem)"
-                            @visible-change="onVisibleChange" overlayClassName="del-menu-popup" trigger="click"
-                            destroy-on-close placement="top-left">
-                            <div v-if="(activeSubmenu == subindex) || (currentSecondpath == subitem.path) || subitem.isMore"
-                                @click.stop="openMore(subindex)" variant="outline" class="menu-more-wrap">
-                                <t-icon name="ellipsis" class="menu-more" />
+        <div class="nav_box">
+            <div class="menu_items">
+                <div v-for="(item, index) in menuArr" :key="index" class="menu_item_wrapper">
+                    <div @click="gotopage(item.path)"
+                        @mouseenter="mouseenteMenu(item.path)" @mouseleave="mouseleaveMenu(item.path)"
+                        :class="['menu_item', item.childrenPath && item.childrenPath == currentpath ? 'menu_item_c_active' : item.path == currentpath ? 'menu_item_active' : '']">
+                        <div class="menu_item-box">
+                            <div class="menu_icon">
+                                <img class="icon" :src="getImgSrc(item.icon == 'home' ? homeIcon : item.icon == 'zhishiku' ? knowledgeIcon : item.icon == 'setting' ? settingIcon : prefixIcon)" alt="">
                             </div>
-                            <template #content>
-                                <span class="del_submenu">删除记录</span>
-                            </template>
-                        </t-popup>
+                            <span class="menu_title">{{ item.title }}</span>
+                        </div>
                     </div>
+                    <!-- 子菜单下拉 - 隐藏历史对话列表，因为已移到页面中央 -->
+                    <!-- <div class="submenu_dropdown" v-if="item.children && (item.path == currentpath || item.childrenPath == currentpath)">
+                        <div ref="submenuscrollContainer" @scroll="handleScroll" class="submenu">
+                            <div class="submenu_item_p" v-for="(subitem, subindex) in item.children" :key="subindex"
+                                @click="gotopage(subitem.path)">
+                                <div :class="['submenu_item', currentSecondpath == subitem.path ? 'submenu_item_active' : '']"
+                                    @mouseenter="mouseenteBotDownr(subindex)" @mouseleave="mouseleaveBotDown">
+                                    <i v-if="currentSecondpath == subitem.path" class="dot"></i>
+                                    <span class="submenu_title"
+                                        :style="currentSecondpath == subitem.path ? 'margin-left:14px;max-width:160px;' : 'margin-left:18px;max-width:173px;'">
+                                        {{ subitem.title }}
+                                    </span>
+                                    <t-popup v-model:visible="subitem.isMore" @overlay-click="delCard(subindex, subitem)"
+                                        @visible-change="onVisibleChange" overlayClassName="del-menu-popup" trigger="click"
+                                        destroy-on-close placement="top-left">
+                                        <div v-if="(activeSubmenu == subindex) || (currentSecondpath == subitem.path) || subitem.isMore"
+                                            @click.stop="openMore(subindex)" variant="outline" class="menu-more-wrap">
+                                            <t-icon name="ellipsis" class="menu-more" />
+                                        </div>
+                                        <template #content>
+                                            <span class="del_submenu">删除记录</span>
+                                        </template>
+                                    </t-popup>
+                                </div>
+                            </div>
+                        </div>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -95,7 +94,7 @@ const onVisibleChange = (e) => {
 const delCard = (index, item) => {
     delSession(item.id).then(res => {
         if (res && res.success) {
-            menuArr.value[1].children.splice(index, 1);
+            menuArr.value[2].children.splice(index, 1);
             if (item.id == route.params.chatid) {
                 router.push('/platform/creatChat');
             }
@@ -161,12 +160,14 @@ watch([() => route.name, () => route.params], (newvalue) => {
 
 });
 let fileAddIcon = ref('file-add-green.svg');
+let homeIcon = ref('home.svg');
 let knowledgeIcon = ref('zhishiku-green.svg');
 let prefixIcon = ref('prefixIcon.svg');
 let settingIcon = ref('setting.svg');
 let pathPrefix = ref(route.name)
 const getIcon = (path) => {
     fileAddIcon.value = path == 'knowledgeBase' ? 'file-add-green.svg' : 'file-add.svg';
+    homeIcon.value = path == 'home' ? 'home-green.svg' : 'home.svg';
     knowledgeIcon.value = path == 'knowledgeBase' ? 'zhishiku-green.svg' : 'zhishiku.svg';
     prefixIcon.value = path == 'creatChat' ? 'prefixIcon-green.svg' : path == 'knowledgeBase' ? 'prefixIcon-grey.svg' : 'prefixIcon.svg';
     settingIcon.value = path == 'settings' ? 'setting-green.svg' : 'setting.svg';
@@ -176,7 +177,7 @@ const gotopage = (path) => {
     pathPrefix.value = path;
     // 如果是系统设置，跳转到初始化配置页面
     if (path === 'settings') {
-        router.push('/initialization');
+        router.push('/platform/initialization');
     } else {
         router.push(`/platform/${path}`);
     }
@@ -205,11 +206,240 @@ const mouseleaveMenu = (path) => {
     cursor: pointer;
 }
 
-.aside_box {
-    min-width: 260px;
-    padding: 8px;
-    background: #fff;
+/* 科技风格顶部导航栏 */
+.header_box {
+    width: 100%;
+    height: 64px;
+    padding: 0 24px;
+    background: var(--tech-gradient-card) !important;
+    border-bottom: 1px solid var(--tech-border);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: visible;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     box-sizing: border-box;
+    z-index: 1000;
+}
+
+.tech-header::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--tech-gradient-accent);
+    opacity: 0.8;
+    z-index: 1001;
+}
+
+.logo_box {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.logo_text {
+    color: var(--tech-primary);
+    font-size: 20px;
+    font-weight: 700;
+    font-family: 'PingFang SC', sans-serif;
+    text-shadow: 0 0 10px var(--tech-primary);
+    transition: all 0.3s ease;
+}
+
+.logo_text:hover {
+    text-shadow: 0 0 15px var(--tech-primary), 0 0 25px var(--tech-primary);
+}
+
+.nav_box {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.menu_items {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 100%;
+    padding: 0 8px;
+}
+
+.menu_item_wrapper {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.tech-header .menu_item {
+    background: linear-gradient(135deg, rgba(30, 30, 46, 0.8) 0%, rgba(42, 42, 62, 0.6) 100%);
+    border: 1px solid var(--tech-border);
+    border-radius: 12px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    height: 38px;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.tech-header .menu_item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--tech-primary) 0%, var(--tech-accent) 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    border-radius: 12px;
+}
+
+.tech-header .menu_item::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--tech-primary);
+    transform: translateX(-50%);
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 1px;
+}
+
+.tech-header .menu_item:hover {
+    background: linear-gradient(135deg, rgba(30, 30, 46, 0.95) 0%, rgba(42, 42, 62, 0.8) 100%) !important;
+    border-color: var(--tech-primary);
+    box-shadow: 0 4px 20px rgba(0, 255, 157, 0.2), 0 0 0 1px rgba(0, 255, 157, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.tech-header .menu_item:hover::before {
+    opacity: 0.1;
+}
+
+.tech-header .menu_item:hover::after {
+    width: 80%;
+}
+
+.tech-header .menu_item_active {
+    background: linear-gradient(135deg, rgba(0, 255, 157, 0.15) 0%, rgba(0, 255, 157, 0.05) 100%) !important;
+    border-color: var(--tech-primary) !important;
+    box-shadow: 0 4px 25px rgba(0, 255, 157, 0.3), 0 0 0 1px var(--tech-primary), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.tech-header .menu_item_active::before {
+    opacity: 0.2;
+}
+
+.tech-header .menu_item_active::after {
+    width: 100%;
+}
+
+.tech-header .menu_title {
+    color: var(--tech-text-secondary) !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    position: relative;
+    z-index: 1;
+}
+
+.tech-header .menu_icon {
+    color: var(--tech-text-secondary) !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tech-header .menu_icon .icon {
+    width: 20px;
+    height: 20px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tech-header .menu_item:hover .menu_title {
+    color: var(--tech-primary) !important;
+    text-shadow: 0 0 12px rgba(0, 255, 157, 0.6);
+}
+
+.tech-header .menu_item:hover .menu_icon {
+    color: var(--tech-primary) !important;
+    filter: drop-shadow(0 0 8px rgba(0, 255, 157, 0.6));
+}
+
+.tech-header .menu_item_active .menu_title {
+    color: var(--tech-primary) !important;
+    text-shadow: 0 0 15px rgba(0, 255, 157, 0.8);
+    font-weight: 600;
+}
+
+.tech-header .menu_item_active .menu_icon {
+    color: var(--tech-primary) !important;
+    filter: drop-shadow(0 0 10px rgba(0, 255, 157, 0.8));
+}
+
+/* 子菜单下拉样式 */
+.submenu_dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 200px;
+    z-index: 1001;
+    margin-top: 4px;
+}
+
+.tech-header .submenu {
+    background: var(--tech-bg-secondary);
+    border-radius: 8px;
+    padding: 8px;
+    border: 1px solid var(--tech-border);
+    box-shadow: var(--tech-shadow-glow-strong);
+    backdrop-filter: blur(10px);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.tech-header .submenu_item {
+    color: var(--tech-text-muted) !important;
+    transition: all 0.3s ease;
+    border-radius: 6px;
+    position: relative;
+}
+
+.tech-header .submenu_item:hover {
+    background: var(--tech-bg-hover) !important;
+    color: var(--tech-text-secondary) !important;
+    transform: translateX(2px);
+}
+
+.tech-header .submenu_item_active {
+    background: var(--tech-bg-active) !important;
+    color: var(--tech-primary) !important;
+    box-shadow: inset 3px 0 0 var(--tech-primary);
+}
+
+.tech-header .submenu_item .dot {
+    background: var(--tech-primary) !important;
+    box-shadow: 0 0 6px var(--tech-primary);
+}
+
+.aside_box {
 
     .logo_box {
         height: 80px;
@@ -245,12 +475,20 @@ const mouseleaveMenu = (path) => {
     }
 
 
-    .upload-file-wrap {
-        padding: 6px;
-        border-radius: 3px;
-        height: 32px;
-        width: 32px;
-        box-sizing: border-box;
+    .menu_item-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .tech-header .menu_item-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+        z-index: 1;
     }
 
     .upload-file-wrap:hover {
@@ -270,12 +508,14 @@ const mouseleaveMenu = (path) => {
     }
 
     .menu_item_active {
-        border-radius: 4px;
-        background: #07c05f1a !important;
+        background: rgba(7, 192, 95, 0.15) !important;
+        border-left: 3px solid #07c05f;
+        box-shadow: 0 2px 8px rgba(7, 192, 95, 0.2);
 
         .menu_icon,
         .menu_title {
             color: #07c05f !important;
+            font-weight: 600;
         }
     }
 
@@ -288,8 +528,8 @@ const mouseleaveMenu = (path) => {
     }
 
     .menu_p {
-        height: 56px;
-        padding: 6px 0;
+        height: 52px;
+        padding: 4px 0;
         box-sizing: border-box;
     }
 
@@ -298,10 +538,12 @@ const mouseleaveMenu = (path) => {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        height: 48px;
-        padding: 13px 8px 13px 16px;
+        height: 38px;
+        padding: 8px 12px;
         box-sizing: border-box;
-        margin-bottom: 4px;
+        margin: 2px 8px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
 
         .menu_item-box {
             display: flex;
@@ -309,21 +551,30 @@ const mouseleaveMenu = (path) => {
         }
 
         &:hover {
-            border-radius: 4px;
-            background: #30323605;
-            color: #00000099;
+            background: rgba(7, 192, 95, 0.08);
+            transform: translateX(2px);
 
             .menu_icon,
             .menu_title {
-                color: #00000099;
+                color: #07c05f;
             }
         }
     }
 
     .menu_icon {
         display: flex;
-        margin-right: 10px;
-        color: #00000099;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        margin-right: 12px;
+        flex-shrink: 0;
+
+        img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+        }
 
         .icon {
             width: 20px;
@@ -334,13 +585,12 @@ const mouseleaveMenu = (path) => {
     }
 
     .menu_title {
-        color: #00000099;
-        text-overflow: ellipsis;
         font-family: "PingFang SC";
         font-size: 14px;
         font-style: normal;
         font-weight: 600;
         line-height: 22px;
+        white-space: nowrap;
     }
 
     .submenu {
@@ -424,6 +674,63 @@ const mouseleaveMenu = (path) => {
 
         .menu-more {
             color: #07c05f !important;
+        }
+    }
+}
+
+/* 科技风格菜单适配 */
+:root[theme-mode="tech-dark"] .menu {
+    background: var(--tech-bg-card) !important;
+    border-right: 1px solid var(--tech-border);
+
+    .menu_icon,
+    .menu_title {
+        color: var(--tech-text-secondary) !important;
+    }
+
+    .submenu_item {
+        color: var(--tech-text-secondary) !important;
+
+        &:hover {
+            background: var(--tech-bg-hover) !important;
+            color: var(--tech-text-primary) !important;
+
+            .menu-more {
+                color: var(--tech-text-primary) !important;
+            }
+        }
+    }
+
+    .menu_item:hover {
+        background: rgba(0, 212, 255, 0.1) !important;
+        transform: translateX(2px);
+        box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+
+        .menu_icon,
+        .menu_title {
+            color: var(--tech-primary) !important;
+        }
+    }
+
+    .menu_item_active {
+        background: rgba(0, 212, 255, 0.2) !important;
+        border-left: 3px solid var(--tech-primary);
+        box-shadow: 0 2px 12px rgba(0, 212, 255, 0.4), inset 0 0 20px rgba(0, 212, 255, 0.1);
+
+        .menu_icon,
+        .menu_title {
+            color: var(--tech-primary) !important;
+            font-weight: 600;
+            text-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+        }
+    }
+
+    .submenu_item_active {
+        background: rgba(0, 212, 255, 0.2) !important;
+        color: var(--tech-primary) !important;
+
+        .menu-more {
+            color: var(--tech-primary) !important;
         }
     }
 }
