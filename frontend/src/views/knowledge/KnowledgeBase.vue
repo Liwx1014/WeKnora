@@ -13,7 +13,8 @@ const router = useRouter();
 import {
   batchQueryKnowledge,
 } from "@/api/knowledge-base/index";
-let { cardList, total, moreIndex, details, getKnowled, delKnowledge, openMore, onVisibleChange, getCardDetails, getfDetails } = useKnowledgeBase()
+let { cardList, total, moreIndex, details, getKnowled, delKnowledge, openMore, onVisibleChange, getCardDetails, getfDetails, requestMethod } = useKnowledgeBase()
+let uploadInput = ref()
 let isCardDetails = ref(false);
 let timeout = null;
 let delDialog = ref(false)
@@ -98,6 +99,18 @@ const getDoc = (page) => {
   getfDetails(details.id, page)
 };
 
+const handleDeleteDoc = (docDetails) => {
+  // 找到要删除的文档在cardList中的索引
+  const index = cardList.value.findIndex(item => item.id === docDetails.id);
+  if (index !== -1) {
+    // 设置要删除的文档信息
+    knowledgeIndex.value = index;
+    knowledge.value = cardList.value[index];
+    // 显示删除确认对话框
+    delDialog.value = true;
+  }
+};
+
 const delCardConfirm = () => {
   delDialog.value = false;
   delKnowledge(knowledgeIndex.value, knowledge.value);
@@ -163,11 +176,34 @@ async function createNewSession(value: string): Promise<void> {
     console.error("创建会话出错:", error);
   });
 }
+
+// 上传功能方法
+const triggerFileUpload = () => {
+  uploadInput.value.click();
+};
+
+const handleFileUpload = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    requestMethod(file, uploadInput);
+  }
+};
 </script>
 
 <template>
-  <div v-show="cardList.length" class="knowledge-card-box" style="position: relative">
-    <div class="knowledge-card-wrap" ref="knowledgeScroll" @scroll="handleScroll">
+  <div class="knowledge-container">
+    <!-- 上传按钮区域 -->
+    <div class="upload-section">
+      <input type="file" ref="uploadInput" @change="handleFileUpload" accept=".pdf,.docx,.doc,.txt,.md" style="display: none" />
+      <button class="upload-btn" @click="triggerFileUpload">
+        <t-icon name="upload" class="upload-icon" />
+        <span>上传文档</span>
+      </button>
+      <span class="upload-desc">支持 PDF、DOC、TXT、MD 格式，单个文件不超过 10MB</span>
+    </div>
+    
+    <div v-show="cardList.length" class="knowledge-card-box" style="position: relative">
+      <div class="knowledge-card-wrap" ref="knowledgeScroll" @scroll="handleScroll">
       <div class="knowledge-card" v-for="(item, index) in cardList" :key="index" @click="openCardDetails(item)">
         <div class="card-content">
           <div class="card-content-nav">
@@ -219,10 +255,11 @@ async function createNewSession(value: string): Promise<void> {
         </div>
       </t-dialog>
     </div>
-    <InputField @send-msg="sendMsg"></InputField>
-    <DocContent :visible="isCardDetails" :details="details" @closeDoc="closeDoc" @getDoc="getDoc"></DocContent>
+      <InputField @send-msg="sendMsg"></InputField>
+      <DocContent :visible="isCardDetails" :details="details" @closeDoc="closeDoc" @getDoc="getDoc" @deleteDoc="handleDeleteDoc"></DocContent>
+    </div>
+    <EmptyKnowledge v-show="!cardList.length"></EmptyKnowledge>
   </div>
-  <EmptyKnowledge v-show="!cardList.length"></EmptyKnowledge>
 </template>
 <style>
 .card-more {
@@ -243,8 +280,58 @@ async function createNewSession(value: string): Promise<void> {
 }
 </style>
 <style scoped lang="less">
+.knowledge-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.upload-section {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(0, 0, 0, 0.02);
+  backdrop-filter: blur(10px);
+}
+
+.upload-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #00d4aa 0%, #00a693 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 212, 170, 0.3);
+}
+
+.upload-btn:hover {
+  background: linear-gradient(135deg, #00a693 0%, #008a7a 100%);
+  box-shadow: 0 4px 12px rgba(0, 212, 170, 0.4);
+  transform: translateY(-1px);
+}
+
+.upload-icon {
+  font-size: 16px;
+}
+
+.upload-desc {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  font-weight: 400;
+}
+
 .knowledge-card-box {
   flex: 1;
+  overflow: hidden;
 }
 
 @media (max-width: 1250px) and (min-width: 1045px) {
@@ -569,6 +656,111 @@ async function createNewSession(value: string): Promise<void> {
 @media (min-width: 2000px) {
   .knowledge-card-wrap {
     grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* 科技风格知识库适配 */
+:root[theme-mode="tech-dark"] {
+  .knowledge-container {
+    background: var(--tech-bg-primary);
+  }
+
+  .upload-section {
+    background: var(--tech-bg-card) !important;
+    border-bottom: 1px solid var(--tech-border) !important;
+    backdrop-filter: blur(20px);
+  }
+
+  .upload-desc {
+    color: var(--tech-text-muted) !important;
+  }
+
+  .knowledge-card {
+    background: var(--tech-bg-card) !important;
+    border: 1px solid var(--tech-border) !important;
+    box-shadow: var(--tech-shadow-card) !important;
+
+    &:hover {
+      border-color: var(--tech-primary) !important;
+      box-shadow: var(--tech-shadow-glow) !important;
+    }
+
+    .card-content-title {
+      color: var(--tech-text-primary) !important;
+    }
+
+    .card-content-txt {
+      color: var(--tech-text-secondary) !important;
+    }
+
+    .card-analyze-txt {
+      color: var(--tech-success) !important;
+    }
+
+    .card-time,
+    .card-type {
+      color: var(--tech-text-muted) !important;
+    }
+
+    .card-type {
+      background: var(--tech-bg-secondary) !important;
+    }
+
+    .card-bottom {
+      background: var(--tech-bg-secondary) !important;
+    }
+
+    .more-wrap:hover {
+      background: var(--tech-bg-hover) !important;
+    }
+  }
+
+  .knowledge-card-upload {
+    color: var(--tech-text-secondary) !important;
+
+    .btn-upload {
+      border-color: var(--tech-border) !important;
+      background: var(--tech-bg-secondary) !important;
+      color: var(--tech-text-primary) !important;
+
+      &:hover {
+        border-color: var(--tech-primary) !important;
+        background: var(--tech-bg-hover) !important;
+      }
+    }
+  }
+
+  .upload-described {
+    color: var(--tech-text-muted) !important;
+  }
+
+  .circle-wrap {
+    .circle-title {
+      color: var(--tech-text-primary) !important;
+    }
+
+    .del-circle-txt {
+      color: var(--tech-text-secondary) !important;
+    }
+
+    .circle-btn-txt {
+      color: var(--tech-text-secondary) !important;
+
+      &.confirm {
+        color: var(--tech-danger) !important;
+      }
+    }
+  }
+
+  .card-more .t-popup__content {
+    background: var(--tech-bg-card) !important;
+    border: 1px solid var(--tech-border) !important;
+    color: var(--tech-text-secondary) !important;
+
+    &:hover {
+      color: var(--tech-danger) !important;
+      background: var(--tech-bg-hover) !important;
+    }
   }
 }
 </style>

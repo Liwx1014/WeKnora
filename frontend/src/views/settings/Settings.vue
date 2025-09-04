@@ -97,4 +97,68 @@ const resetForm = () => {
         max-width: 600px;
     }
 }
-</style> 
+
+/* 科技风格设置页面适配 */
+:root[theme-mode="tech-dark"] .settings-container {
+    background-color: var(--tech-bg-card) !important;
+    border: 1px solid var(--tech-border);
+    box-shadow: var(--tech-shadow-card);
+
+    .settings-header {
+        border-bottom: 1px solid var(--tech-border) !important;
+
+        h2 {
+            color: var(--tech-text-primary) !important;
+        }
+    }
+
+    /* 表单标签样式 */
+    :deep(.t-form-item__label) {
+        color: var(--tech-text-secondary) !important;
+    }
+
+    /* 输入框样式 */
+    :deep(.t-input) {
+        background: var(--tech-bg-secondary) !important;
+        border: 1px solid var(--tech-border) !important;
+        color: var(--tech-text-primary) !important;
+
+        &:hover {
+            border-color: var(--tech-primary) !important;
+        }
+
+        &:focus {
+            border-color: var(--tech-primary) !important;
+            box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2) !important;
+        }
+
+        &::placeholder {
+            color: var(--tech-text-muted) !important;
+        }
+    }
+
+    /* 按钮样式 */
+    :deep(.t-button--theme-primary) {
+        background: var(--tech-gradient-primary) !important;
+        border: 1px solid var(--tech-primary) !important;
+        color: #ffffff !important;
+
+        &:hover {
+            background: var(--tech-primary) !important;
+            box-shadow: var(--tech-shadow-glow) !important;
+        }
+    }
+
+    :deep(.t-button--theme-default) {
+        background: var(--tech-bg-secondary) !important;
+        border: 1px solid var(--tech-border) !important;
+        color: var(--tech-text-secondary) !important;
+
+        &:hover {
+            background: var(--tech-bg-hover) !important;
+            border-color: var(--tech-primary) !important;
+            color: var(--tech-text-primary) !important;
+        }
+    }
+}
+</style>

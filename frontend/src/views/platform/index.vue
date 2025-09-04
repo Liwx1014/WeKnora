@@ -1,7 +1,9 @@
 <template>
-    <div class="main" ref="dropzone" @dragover="dragover" @drop="drop" @dragstart="dragstart">
+    <div class="main" ref="dropzone" @dragover="dragover" @drop="drop" @dragstart="dragstart" @dragleave="dragleave">
         <Menu></Menu>
-        <RouterView />
+        <div class="content-area">
+            <RouterView />
+        </div>
         <div class="upload-mask" v-show="ismask">
             <input type="file" style="display: none" ref="uploadInput" accept=".pdf,.docx,.doc,.txt,.md" />
             <UploadMask></UploadMask>
@@ -24,9 +26,12 @@ let dropzone = ref();
 let uploadInput = ref();
 const dragover = (event) => {
     event.preventDefault();
-    ismask.value = true;
-    if (((window.innerWidth - event.clientX) < 50) || ((window.innerHeight - event.clientY) < 50) || event.clientX < 50 || event.clientY < 50) {
-        ismask.value = false
+    // 只有在拖拽文件时才显示遮罩
+    if (event.dataTransfer && event.dataTransfer.types.includes('Files')) {
+        ismask.value = true;
+        if (((window.innerWidth - event.clientX) < 50) || ((window.innerHeight - event.clientY) < 50) || event.clientX < 50 || event.clientY < 50) {
+            ismask.value = false
+        }
     }
 }
 const drop = (event) => {
@@ -46,13 +51,28 @@ const drop = (event) => {
 const dragstart = (event) => {
     event.preventDefault();
 }
+
+// 添加 dragleave 事件处理，确保遮罩正确隐藏
+const dragleave = (event) => {
+    event.preventDefault();
+    // 检查是否真的离开了拖拽区域
+    if (!event.relatedTarget || !dropzone.value?.contains(event.relatedTarget)) {
+        ismask.value = false;
+    }
+}
 </script>
 <style lang="less">
 .main {
     display: flex;
+    flex-direction: column;
     width: 100%;
     height: 100%;
     min-width: 600px;
+}
+
+.content-area {
+    flex: 1;
+    overflow: hidden;
 }
 
 .upload-mask {

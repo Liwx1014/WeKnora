@@ -126,4 +126,52 @@ const referBoxSwitch = () => {
 .refer-to-layer {
     width: 400px;
 }
+
+/* 科技风格文档信息适配 */
+.tech-bot-msg .refer {
+    background-color: var(--tech-bg-secondary) !important;
+    border: 1px solid var(--tech-border);
+    border-radius: 8px;
+}
+
+.tech-bot-msg .refer_header {
+    color: var(--tech-text-secondary) !important;
+}
+
+.tech-bot-msg .refer_header:hover {
+    background-color: var(--tech-bg-hover) !important;
+}
+
+.tech-bot-msg .doc_content {
+    color: var(--tech-text-primary) !important;
+    border: 1px solid var(--tech-primary) !important;
+    background: var(--tech-bg-card) !important;
+    border-radius: 8px;
+    box-shadow: var(--tech-shadow-md);
+    font-weight: 400;
+    line-height: 1.6;
+}
+
+.tech-bot-msg .doc {
+    color: var(--tech-primary) !important;
+    text-decoration-color: var(--tech-primary);
+}
+
+/* 科技风格弹出层样式优化 */
+:root[theme-mode="tech-dark"] .refer-to-layer .t-popup__content {
+    background: var(--tech-bg-card) !important;
+    border: 1px solid var(--tech-primary) !important;
+    border-radius: 8px !important;
+    box-shadow: var(--tech-shadow-lg), 0 0 20px rgba(0, 212, 255, 0.1) !important;
+    backdrop-filter: blur(10px);
+}
+
+:root[theme-mode="tech-dark"] .refer-to-layer .doc_content {
+    color: var(--tech-text-primary) !important;
+    background: transparent !important;
+    border: none !important;
+    font-size: 14px;
+    line-height: 1.6;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
 </style>

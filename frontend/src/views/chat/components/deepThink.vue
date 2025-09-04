@@ -135,4 +135,43 @@ const handlePanelChange = (val) => {
         text-align: justify;
     }
 }
+
+/* 科技风格深度思考适配 */
+.tech-bot-msg .deep-think {
+    background: var(--tech-bg-secondary) !important;
+    border: 1px solid var(--tech-border);
+    border-radius: 8px;
+}
+
+.tech-bot-msg .deep-think :deep(.t-collapse.t--border-less .t-collapse-panel__body) {
+    background: var(--tech-bg-secondary) !important;
+}
+
+.tech-bot-msg .deep-think :deep(.t-collapse-panel__wrapper .t-collapse-panel__header) {
+    background: var(--tech-bg-secondary) !important;
+    
+    &:hover {
+        background-color: var(--tech-bg-hover) !important;
+    }
+}
+
+.tech-bot-msg .deep-think .chevron {
+    color: var(--tech-text-muted) !important;
+}
+
+.tech-bot-msg .deep-think .thinking {
+    color: var(--tech-text-primary) !important;
+}
+
+.tech-bot-msg .deep-think .done {
+    color: var(--tech-text-secondary) !important;
+    
+    .deep_icon {
+        color: var(--tech-primary) !important;
+    }
+}
+
+.tech-bot-msg .deep-think .content {
+    color: var(--tech-text-secondary) !important;
+}
 </style>

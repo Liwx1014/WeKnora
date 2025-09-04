@@ -39,4 +39,19 @@
     width: 162px;
     height: 162px;
 }
+
+/* 科技风格空知识库适配 */
+:root[theme-mode="tech-dark"] .empty {
+    .empty-txt {
+        color: var(--tech-text-secondary) !important;
+    }
+
+    .empty-type-txt {
+        color: var(--tech-text-muted) !important;
+    }
+
+    .empty-img {
+        filter: brightness(0.8) sepia(1) hue-rotate(180deg) saturate(2);
+    }
+}
 </style>

@@ -8,12 +8,7 @@ const router = createRouter({
       path: "/",
       redirect: "/platform",
     },
-    {
-      path: "/initialization",
-      name: "initialization",
-      component: () => import("../views/initialization/InitializationConfig.vue"),
-      meta: { requiresInit: false } // 初始化页面不需要检查初始化状态
-    },
+
     {
       path: "/knowledgeBase",
       name: "home",
@@ -23,10 +18,16 @@ const router = createRouter({
     {
       path: "/platform",
       name: "Platform",
-      redirect: "/platform/knowledgeBase",
+      redirect: "/platform/home",
       component: () => import("../views/platform/index.vue"),
       meta: { requiresInit: true },
       children: [
+        {
+          path: "home",
+          name: "home",
+          component: () => import("../views/home/Home.vue"),
+          meta: { requiresInit: true }
+        },
         {
           path: "knowledgeBase",
           name: "knowledgeBase",
@@ -50,6 +51,12 @@ const router = createRouter({
           name: "settings",
           component: () => import("../views/settings/Settings.vue"),
           meta: { requiresInit: true }
+        },
+        {
+          path: "initialization",
+          name: "initialization",
+          component: () => import("../views/initialization/InitializationConfig.vue"),
+          meta: { requiresInit: false } // 初始化页面不需要检查初始化状态
         },
       ],
     },
@@ -77,12 +84,12 @@ router.beforeEach(async (to, from, next) => {
     } else {
       // 系统未初始化，跳转到初始化页面
       console.log('系统未初始化，跳转到初始化页面');
-      next('/initialization');
+      next('/platform/initialization');
     }
   } catch (error) {
     console.error('检查初始化状态失败:', error);
     // 如果检查失败，默认认为需要初始化
-    next('/initialization');
+    next('/platform/initialization');
   }
 });
 
