@@ -1,6 +1,6 @@
 import logging
-import os
-import io
+
+import re
 from typing import Any, List, Tuple, Dict, Union
 
 import fitz 
@@ -123,10 +123,13 @@ class PDFParser(BaseParser):
                 # --- 2. 处理去重后的表格 ---
                 if unique_tables:
                     logger.info(f"Found {len(unique_tables)} unique tables on page {page_num + 1}")
-                    for table in unique_tables:
+                    for table_idx,table in enumerate(unique_tables):
                         markdown_table = self._convert_table_to_markdown(table.extract())
-                        page_content_parts.append(f"\n\n{markdown_table}\n\n")
-
+                        marked_table = (
+                            f"\nTABLE {page_num + 1}.{table_idx + 1}\n"
+                            f"{markdown_table.strip()}"
+                        )
+                        page_content_parts.append(marked_table)
                 # --- 3. 提取非表格区域的文本 ---
                 table_bboxes = [fitz.Rect(table.bbox) for table in unique_tables]
                 
@@ -137,11 +140,27 @@ class PDFParser(BaseParser):
                     block_rect = fitz.Rect(block[0:4])
                     if not any(bbox.intersects(block_rect) for bbox in table_bboxes):
                         non_table_text_parts.append(block[4])
-                
-                page_content_parts.insert(0, "".join(non_table_text_parts))
+
+                # 将非表格文本添加到内容开头
+                page_content_parts.insert(0, "".join(non_table_text_parts).strip())
                 all_page_content.append("".join(page_content_parts))
 
-            final_text = "\n\n--- Page Break ---\n\n".join(all_page_content)
+            cleaned_pages = []
+            for page_text in all_page_content:
+                # 使用正则表达式查找并替换 "页码" + "TABLE" 的模式
+                # 替换为 "TABLE"，有效去除前面的页码
+                cleaned_text = re.sub(r"(\d+)\s*TABLE", "TABLE", page_text)
+                cleaned_pages.append(cleaned_text)
+
+            pages_with_headers = []
+            for i, page_text in enumerate(cleaned_pages):
+                page_num = i + 1
+                header = f"--- Page {page_num} ---"
+                # .strip() 可以去除每页内容可能带有的多余首尾空行
+                pages_with_headers.append(f"{header}\n\n{page_text.strip()}")
+             # 使用两个换行符作为页面之间的分隔
+            final_text = "\n\n".join(pages_with_headers) 
+
             logger.info(f"PDF parsing complete. Extracted {len(final_text)} text chars.")
             return final_text
             
