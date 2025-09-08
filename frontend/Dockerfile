@@ -14,6 +14,12 @@ COPY package*.json ./
 RUN corepack enable
 RUN pnpm install
 
+# --- 新增命令：安装 Markdown 和 KaTeX 相关库 ---
+# markdown-it: 核心 Markdown 解析器
+# katex: 公式渲染引擎
+# markdown-it-katex: 连接 markdown-it 和 katex 的插件
+# @types/*: 为 TypeScript 提供类型定义，增强开发体验
+RUN pnpm add marked-katex-extension katex
 # 复制项目文件
 COPY . .
 

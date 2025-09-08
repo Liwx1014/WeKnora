@@ -19,13 +19,14 @@ node_modules/
 /dist/
 /build/
 *.log
-
+*.tar
+*.zip
 # 临时文件
 tmp/
 temp/
 
 WeKnora
-/models/
+models/*
 services/docreader/src/proto/__pycache__
 services/docreader/src/parser/__pycache__
 test/data/mswag.txt

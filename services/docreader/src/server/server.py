@@ -231,16 +231,33 @@ class DocReaderServicer(docreader_pb2_grpc.DocReaderServicer):
                 context.set_code(grpc.StatusCode.INTERNAL)
                 context.set_details(str(e))
                 return ReadResponse(error=str(e))
-                
+
+    # Add a dedicated helper method to clean text containing surrogate characters
+    def _cleanup_text(self, text: str) -> str:
+        """
+        Cleans up a string by handling potential surrogate characters
+        that are invalid in standard UTF-8, preventing UnicodeEncodeError.
+        """
+        if not isinstance(text, str):
+            return text
+        # The encode/decode cycle with 'surrogatepass' fixes malformed strings
+        return text.encode('utf-8', 'replace').decode('utf-8', 'replace')           
     def _convert_chunk_to_proto(self, chunk):
+
         """Convert internal Chunk object to protobuf Chunk message"""
+        cleand_content = self._cleanup_text(chunk.content)
+        # proto_chunk = Chunk(
+        #     content=chunk.content,
+        #     seq=chunk.seq,
+        #     start=chunk.start,
+        #     end=chunk.end,
+        # )
         proto_chunk = Chunk(
-            content=chunk.content,
+            content=cleand_content,
             seq=chunk.seq,
             start=chunk.start,
             end=chunk.end,
         )
-        
         # If chunk has images attribute and is not empty, add image info
         if hasattr(chunk, "images") and chunk.images:
             logger.info(f"Adding {len(chunk.images)} images to chunk {chunk.seq}")

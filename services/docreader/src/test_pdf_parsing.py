@@ -3,10 +3,14 @@ import logging
 from typing import Dict
 from PIL.Image import Image as PilImage
 from types import SimpleNamespace # A simple way to create mock objects
-# 导入您项目中的 PDFParser 类
+
+# 导入您项目中的 PDFParser 和 ParseResult 类
+# [修改] 导入 ParseResult 以便进行类型提示
 from parser.pdf_parser import PDFParser
+from parser.base_parser import ParseResult
+
 # 1. 设置您想要测试的PDF文件的路径
-PDF_FILE_PATH = "/data1/home/lwx/work/Code/Experiment/WeKnora/services/docreader/src/zhidu_travel.pdf"  
+PDF_FILE_PATH = "/data1/home/lwx/work/Code/Experiment/WeKnora/services/docreader/src/WBF.pdf"  
 # 2. 设置一个目录来保存提取出的图像
 OUTPUT_DIR = "extracted_images"
 # ---
@@ -19,32 +23,36 @@ def setup_logging():
 
 def print_section_header(title: str):
     """打印一个格式化的节标题"""
-    print("\n" + "=" * 30)
+    print("\n" + "=" * 40)
     print(f"  {title.upper()}")
-    print("=" * 30)
+    print("=" * 40)
 
 def print_image_map_details(image_map: Dict[str, PilImage]):
     """详细打印 image_map 的信息并保存图像"""
-    print_section_header("提取的图像信息 (Image Map)")
-    if not image_map:
-        print(" -> 未在此PDF中提取到任何图像。")
+    # 这个函数在新的测试流程中不会被直接调用，但保留以备后用
+    pass
+
+# [新增] 用于打印分块结果的函数
+def print_chunk_details(result: ParseResult):
+    """详细打印分块的结果，验证表格是否完整"""
+    print_section_header("分块验证 (Chunk Verification)")
+    if not result.chunks:
+        print(" -> 未生成任何 Chunk。")
         return
-    print(f" -> 总共提取到 {len(image_map)} 张图像。")
+
+    print(f" -> 总共生成了 {len(result.chunks)} 个 Chunk。")
     print("-" * 20)
-    if not os.path.exists(OUTPUT_DIR):
-        print(f"创建输出目录: {OUTPUT_DIR}")
-        os.makedirs(OUTPUT_DIR)
-    for image_name, pil_image in image_map.items():
-        print(f"  图像名称 (内部): '{image_name}'")
-        print(f"    - 尺寸 (宽x高): {pil_image.size}")
-        print(f"    - 模式 (e.g., RGB): {pil_image.mode}")
-        try:
-            save_path = os.path.join(OUTPUT_DIR, image_name)
-            pil_image.save(save_path)
-            print(f"    - [成功] 图像已保存至: '{save_path}'")
-        except Exception as e:
-            print(f"    - [失败] 保存图像时出错: {e}")
-        print("-" * 20)
+    
+    for i, chunk in enumerate(result.chunks):
+        # 打印每个 Chunk 的头部信息
+        print(f"--- Chunk #{i+1} (序号: {chunk.seq}) ---")
+        print(f"    - 字符范围: 从 {chunk.start} 到 {chunk.end} (长度: {len(chunk.content)})")
+        
+        # 打印 Chunk 的内容
+        print("-" * 10 + " [Chunk 内容开始] " + "-" * 10)
+        print(chunk.content)
+        print("-" * 10 + " [Chunk 内容结束] " + "-" * 10)
+        print("\n") # 在每个 Chunk 之后加一个空行，方便阅读
 
 def run_parser_test():
     """执行PDF解析器的测试"""
@@ -57,9 +65,13 @@ def run_parser_test():
     mock_chunking_config = SimpleNamespace(vlm_config=mock_vlm_config)
 
     # 2. 实例化解析器时传入模拟配置
+    # [修改] 可以调整 chunk_size 来观察分块效果
     pdf_parser = PDFParser(
-        enable_multimodal=True,  # 确保多模态逻辑被激活
-        chunking_config=mock_chunking_config
+        file_name=PDF_FILE_PATH,
+        enable_multimodal=False,  # 在这个测试中可以禁用多模态以加快速度
+        chunking_config=mock_chunking_config,
+        chunk_size=1000, # 您可以调整这个值来测试不同的分块边界
+        chunk_overlap=200
     )
     print(f"成功实例化 PDFParser: {pdf_parser.__class__.__name__}")
     
@@ -68,16 +80,21 @@ def run_parser_test():
         pdf_content = f.read()
     print("文件读取完成。")
 
-    print("调用 pdf_parser.parse_into_text() ...")
-    final_text = pdf_parser.parse_into_text(pdf_content)
-    print("解析完成！")
+    # [修改] 调用 .parse() 方法而不是 .parse_into_text()
+    print("调用 pdf_parser.parse() 来执行完整的解析和分块流程...")
+    parse_result = pdf_parser.parse(pdf_content)
+    print("解析和分块完成！")
 
-    print_section_header("最终提取的文本 (Final Text)")
-    print("注意：以下文本包含了纯文本、Markdown格式的表格和图像的占位符。")
+    # [修改] 打印完整的解析文本，用于对比
+    print_section_header("完整提取的文本 (Full Extracted Text)")
+    print("这是未经分块的原始解析结果，用于参考。")
     print("-" * 20 + " [文本开始] " + "-" * 20)
-    print(final_text)
+    print(parse_result.text)
     print("-" * 20 + " [文本结束] " + "-" * 20)
     
+    # [新增] 调用新的函数来打印和验证分块结果
+    print_chunk_details(parse_result)
+
 if __name__ == "__main__": 
     setup_logging()
     run_parser_test()
