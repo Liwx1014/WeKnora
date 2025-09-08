@@ -2,7 +2,6 @@ grpcio
 grpcio-tools
 protobuf
 python-docx
-PyPDF2
 requests
 Pillow
 beautifulsoup4
@@ -15,14 +14,10 @@ mistletoe
 goose3[all]
 paddleocr==3.0.0
 markdown
-pypdf
-cos-python-sdk-v5
-minio
-textract
 antiword
 openai
 ollama
-PyMuPDF
+minio
 
 --extra-index-url https://www.paddlepaddle.org.cn/packages/stable/cpu/
 paddlepaddle==3.0.0

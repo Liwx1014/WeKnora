@@ -7,7 +7,7 @@ import subprocess
 import shutil
 from io import BytesIO
 from typing import Optional, List, Tuple
-import textract
+#import textract
 from PIL import Image
 import zipfile
 import xml.etree.ElementTree as ET
@@ -107,12 +107,12 @@ class DocParser(BaseParser):
                     f"Error using antiword: {str(e)}, falling back to textract"
                 )
 
-            # If antiword fails, try using textract
-            logger.info("Parsing DOC file with textract")
-            text = textract.process(temp_file_path, method="antiword").decode("utf-8")
-            logger.info(
-                f"Successfully extracted {len(text)} characters of text from DOC document using textract"
-            )
+            # # If antiword fails, try using textract
+            # logger.info("Parsing DOC file with textract")
+            # #text = textract.process(temp_file_path, method="antiword").decode("utf-8")
+            # logger.info(
+            #     f"Successfully extracted {len(text)} characters of text from DOC document using textract"
+            # )
 
             # Clean up temporary file
             os.unlink(temp_file_path)

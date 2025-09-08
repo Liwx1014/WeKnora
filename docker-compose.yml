@@ -122,6 +122,7 @@ services:
       - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME}
       - MINIO_USE_SSL=${MINIO_USE_SSL}
       - WEB_PROXY=${WEB_PROXY}
+      - MINERU_MODEL_SOURCE=local
     networks:
       - WeKnora-network
     restart: unless-stopped

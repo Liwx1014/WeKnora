@@ -45,9 +45,16 @@ RUN echo "检查本地protoc安装包..." && \
 # 复制依赖文件
 COPY services/docreader/requirements.txt .
 
-# 安装依赖
-RUN pip cache purge && pip install --no-cache-dir -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+# 预下载 MinerU / ModelScope 模型 (PDF-Extract-Kit-1___0)
+# RUN pip install modelscope -i https://pypi.tuna.tsinghua.edu.cn/simple
+# RUN  modelscope download --model 'OpenDataLab/PDF-Extract-Kit-1___0' 
+# # 检查新下载的模型
+# RUN ls -laR /root/.cache/modelscope/hub
 
+# 安装依赖
+RUN pip install --no-cache-dir -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple 
+RUN pip install --upgrade pip -i https://mirrors.aliyun.com/pypi/simple
+RUN pip install -U "mineru[core]" -i https://mirrors.aliyun.com/pypi/simple 
 # 预下载 PP-OCRv5 模型
 RUN mkdir -p /root/.paddlex/official_models && \
     wget https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv5_server_det_infer.tar \
@@ -133,11 +140,23 @@ RUN python -m playwright install-deps webkit
 
 # 设置 Python 路径
 ENV PYTHONPATH=/app/src
+RUN pip install  "numpy>=1.24,<1.27" "pandas>=1.4.0" -i https://mirrors.aliyun.com/pypi/simple 
 RUN cd /app/src && python -m download_deps
 
 # 创建supervisor配置
 RUN mkdir -p /etc/supervisor/conf.d
 COPY services/docreader/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+#复制文件
+COPY services/docreader/mineru.json /root/mineru.json
+COPY models/models.tar  /app/models.tar
+# 定义正确的模型仓库目录名 (将 '/' 替换为 '___')
+# ENV MODEL_REPO_DIR=OpenDataLab/PDF-Extract-Kit-1.0
+ENV CACHE_ROOT=/root/.cache/modelscope/hub
+# 解压模型到正确的结构
+RUN mkdir -p ${CACHE_ROOT}
+RUN tar -xzvf /app/models.tar -C ${CACHE_ROOT}
+RUN rm -f /app/models.tar
 
 # 暴露 gRPC 端口
 EXPOSE 50051

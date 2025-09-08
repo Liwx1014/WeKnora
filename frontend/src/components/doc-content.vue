@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { marked } from "marked";
+import markedKatex from "marked-katex-extension"; 
+import 'katex/dist/katex.min.css';
 import { onMounted, ref, nextTick, onUnmounted, onUpdated, watch } from "vue";
 import { downKnowledgeDetails } from "@/api/knowledge-base/index";
 import { MessagePlugin } from "tdesign-vue-next";
@@ -8,6 +10,9 @@ marked.use({
   mangle: false,
   headerIds: false,
 });
+marked.use(markedKatex({
+  throwOnError: false 
+}));
 const renderer = new marked.Renderer();
 let page = 1;
 let doc = null;
@@ -18,15 +23,20 @@ let reviewUrl = ref('')
 let reviewImg = ref(false)
 onMounted(() => {
   nextTick(() => {
-    doc = document.getElementsByClassName('t-drawer__body')[0]
-    doc.addEventListener('scroll', handleDetailsScroll);
+    const drawerBody = document.querySelector('.t-drawer__body');
+    if (drawerBody) {
+      doc = drawerBody;
+      doc.addEventListener('scroll', handleDetailsScroll);
+    }
   })
 })
 onUpdated(() => {
   page = 1
 })
 onUnmounted(() => {
-  doc.removeEventListener('scroll', handleDetailsScroll);
+  if (doc) {
+    doc.removeEventListener('scroll', handleDetailsScroll);
+  }
 })
 const checkImage = (url) => {
   return new Promise((resolve) => {
