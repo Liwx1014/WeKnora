@@ -138,6 +138,9 @@ class PDFParser(BaseParser):
         """
         logger.info(f"Parsing PDF with MinerU (pipeline backend), size: {len(content)} bytes")
 
+        temp_pdf = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+        temp_pdf_path = temp_pdf.name
+        
         try:
             # MinerU 的 doc_analyze 函数需要一个 bytes 列表和语言列表
             pdf_bytes_list = [content]
