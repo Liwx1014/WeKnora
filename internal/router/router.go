@@ -29,6 +29,7 @@ type RouterParams struct {
 	ModelHandler          *handler.ModelHandler
 	EvaluationHandler     *handler.EvaluationHandler
 	InitializationHandler *handler.InitializationHandler
+	ChatDBHandler         *handler.ChatDBHandler
 }
 
 // NewRouter 创建新的路由
@@ -94,6 +95,7 @@ func NewRouter(params RouterParams) *gin.Engine {
 		RegisterMessageRoutes(v1, params.MessageHandler)
 		RegisterModelRoutes(v1, params.ModelHandler)
 		RegisterEvaluationRoutes(v1, params.EvaluationHandler)
+		RegisterChatDBRoutes(v1, params.ChatDBHandler)
 	}
 
 	return r
@@ -245,5 +247,17 @@ func RegisterEvaluationRoutes(r *gin.RouterGroup, handler *handler.EvaluationHan
 	{
 		evaluationRoutes.POST("/", handler.Evaluation)
 		evaluationRoutes.GET("/", handler.GetEvaluationResult)
+	}
+}
+
+// RegisterChatDBRoutes 注册ChatDB相关的路由
+func RegisterChatDBRoutes(r *gin.RouterGroup, handler *handler.ChatDBHandler) {
+	// ChatDB路由组
+	chatdb := r.Group("/chatdb")
+	{
+		// 获取所有聊天记录
+		chatdb.GET("/records", handler.GetAllChatRecords)
+		// 根据ID获取聊天记录
+		chatdb.GET("/record/:id", handler.GetChatRecord)
 	}
 }

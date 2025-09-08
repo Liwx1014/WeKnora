@@ -62,9 +62,67 @@
 
       <!-- 右侧区域C -->
       <div class="right-section">
-        <h3 class="section-title">占位区域</h3>
+        <h3 class="section-title">ChatDB 数据</h3>
         <div class="placeholder-content">
-          <p>后续开发功能区域</p>
+          <div v-if="chatDBLoading" class="loading">
+            <p>正在加载数据...</p>
+          </div>
+          <div v-else-if="chatDBError" class="error">
+            <p>加载失败: {{ chatDBError }}</p>
+            <button @click="loadAllChatDBRecords" class="retry-btn">重试</button>
+          </div>
+          <div v-else-if="chatDBRecords && chatDBRecords.length > 0" class="chat-records">
+            <div class="records-list">
+              <div 
+                v-for="record in (chatDBRecords || [])" 
+                :key="record.id" 
+                class="record-banner"
+                @click="showRecordDetails(record.id)"
+              >
+                <span class="record-id">ID: {{ record.id }}</span>
+                <span class="record-date">{{ new Date(record.created_at).toLocaleDateString() }}</span>
+              </div>
+            </div>
+          </div>
+          <div v-else class="no-data">
+            <p>暂无数据</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 记录详情弹窗 -->
+    <div v-if="showRecordDetail" class="modal-overlay" @click="closeRecordDetail">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>ChatDB 记录详情</h3>
+          <button class="close-btn" @click="closeRecordDetail">×</button>
+        </div>
+        <div class="modal-body" v-if="selectedRecord">
+          <div class="detail-item">
+            <label>ID:</label>
+            <span>{{ selectedRecord.id }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Conversation ID:</label>
+            <span>{{ selectedRecord.conversation_id }}</span>
+          </div>
+          <div class="detail-item">
+            <label>创建时间:</label>
+            <span>{{ new Date(selectedRecord.created_at).toLocaleString() }}</span>
+          </div>
+          <div class="detail-item">
+            <label>用户ID:</label>
+            <span>{{ selectedRecord.user_id }}</span>
+          </div>
+          <div class="detail-item">
+            <label>会话ID:</label>
+            <span>{{ selectedRecord.session_id }}</span>
+          </div>
+          <div class="detail-item" v-if="selectedRecord.log_data">
+            <label>日志数据:</label>
+            <pre class="log-data">{{ JSON.stringify(selectedRecord.log_data, null, 2) }}</pre>
+          </div>
         </div>
       </div>
     </div>
@@ -75,6 +133,7 @@
 import { ref, reactive, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import AMapLoader from '@amap/amap-jsapi-loader'
+import { getChatRecordById, getAllChatRecords, type ChatDBRecord, type ChatDBListResponse } from '@/api/chatdb/index'
 
 const router = useRouter()
 
@@ -90,6 +149,66 @@ const stats = reactive({
   placeholder1: 93.5,
   placeholder2: 270
 })
+
+// ChatDB 相关数据
+const chatDBRecords = ref<ChatDBRecord[]>([])
+const chatDBLoading = ref(false)
+const chatDBError = ref<string | null>(null)
+const selectedRecord = ref<ChatDBRecord | null>(null)
+const showRecordDetail = ref(false)
+
+// 初始化数据
+const initializeData = () => {
+  chatDBRecords.value = []
+  chatDBLoading.value = false
+  chatDBError.value = null
+}
+
+// 加载所有 ChatDB 记录
+const loadAllChatDBRecords = async () => {
+  chatDBLoading.value = true
+  chatDBError.value = null
+  
+  try {
+    console.log('开始加载 ChatDB 记录...')
+    const response = await getAllChatRecords(50, 0)
+    console.log('ChatDB API 响应:', response)
+    
+    if (response && response.data && Array.isArray(response.data)) {
+      chatDBRecords.value = response.data
+      console.log('成功加载记录数量:', chatDBRecords.value.length)
+      // console.log('总记录数:', response.data.count || response.data.length)
+    } else {
+      console.warn('API 响应格式异常:', response)
+      chatDBRecords.value = []
+      chatDBError.value = 'API 响应格式异常'
+    }
+  } catch (error: any) {
+    console.error('Failed to load ChatDB records:', error)
+    chatDBRecords.value = []
+    chatDBError.value = error.response?.data?.message || error.message || '加载失败'
+  } finally {
+    chatDBLoading.value = false
+  }
+}
+
+// 显示记录详情
+const showRecordDetails = async (recordId: number) => {
+  try {
+    const response = await getChatRecordById(recordId)
+    selectedRecord.value = response.data
+    showRecordDetail.value = true
+  } catch (error: any) {
+    console.error('Failed to load record details:', error)
+    chatDBError.value = error.response?.data?.message || error.message || '加载记录详情失败'
+  }
+}
+
+// 关闭详情弹窗
+const closeRecordDetail = () => {
+  showRecordDetail.value = false
+  selectedRecord.value = null
+}
 
 // 饼图数据
 const pieData = {
@@ -235,9 +354,14 @@ const drawBarChart = () => {
 
 // 初始化高德地图
 const initMap = async () => {
-  if (!mapContainer.value) return
+  console.log('开始初始化地图...')
+  if (!mapContainer.value) {
+    console.error('地图容器不存在')
+    return
+  }
   
   try {
+    console.log('加载高德地图API...')
     // 加载高德地图API
     const AMap = await AMapLoader.load({
       key: import.meta.env.VITE_AMAP_KEY, // 从环境变量读取高德地图API Key
@@ -314,12 +438,14 @@ const initMap = async () => {
   } catch (error) {
     console.error('高德地图加载失败:', error)
     // 如果地图加载失败，显示错误信息
-    mapContainer.value.innerHTML = `
-      <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #1a1a2e, #16213e); display: flex; align-items: center; justify-content: center; color: #ff6b6b; font-size: 16px; text-align: center;">
-        地图加载失败<br>
-        <small style="color: #888; font-size: 12px;">请检查网络连接或API Key配置</small>
-      </div>
-    `
+    if (mapContainer.value) {
+      mapContainer.value.innerHTML = `
+        <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #1a1a2e, #16213e); display: flex; align-items: center; justify-content: center; color: #ff6b6b; font-size: 16px; text-align: center;">
+          地图加载失败<br>
+          <small style="color: #888; font-size: 12px;">请检查网络连接或API Key配置</small>
+        </div>
+      `
+    }
   }
 }
 
@@ -330,10 +456,26 @@ const navigateTo = (path: string) => {
 
 // 组件挂载时的初始化
 onMounted(async () => {
+  // 初始化数据
+  initializeData()
+  
   await nextTick()
-  drawPieChart()
-  drawBarChart()
-  initMap()
+  
+  // 确保DOM元素存在后再初始化
+  if (pieChart.value) {
+    drawPieChart()
+  }
+  
+  if (barChart.value) {
+    drawBarChart()
+  }
+  
+  if (mapContainer.value) {
+    initMap()
+  }
+  
+  // 加载 ChatDB 数据
+  loadAllChatDBRecords()
 })
 </script>
 
@@ -530,6 +672,219 @@ onMounted(async () => {
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+}
+
+/* ChatDB 记录列表样式 */
+.chat-records {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.records-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.record-banner {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: 8px;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.record-banner:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.record-id {
+  font-weight: bold;
+  color: white;
+}
+
+.record-date {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* 弹窗样式 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.modal-header h3 {
+  color: #00d4ff;
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.modal-body {
+  color: #e2e8f0;
+}
+
+.detail-item {
+  display: flex;
+  margin-bottom: 1rem;
+  align-items: flex-start;
+}
+
+.detail-item label {
+  font-weight: bold;
+  color: #0ea5e9;
+  min-width: 120px;
+  margin-right: 1rem;
+}
+
+.detail-item span {
+  color: #e2e8f0;
+  word-break: break-all;
+}
+
+.log-data {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 6px;
+  padding: 1rem;
+  color: #94a3b8;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  margin: 0;
+}
+
+/* ChatDB 数据样式 */
+.chat-record {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: 1rem;
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 0.4rem;
+  border: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.record-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+.record-item:last-child {
+  border-bottom: none;
+}
+
+.record-item label {
+  font-weight: 600;
+  color: #0ea5e9;
+  min-width: 120px;
+}
+
+.record-item span {
+  color: #e2e8f0;
+  font-family: 'Courier New', monospace;
+  word-break: break-all;
+}
+
+.loading, .error, .no-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.loading p {
+  color: #0ea5e9;
+  font-size: 0.9rem;
+}
+
+.error p {
+  color: #ef4444;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.retry-btn {
+  background: #0ea5e9;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.2s;
+}
+
+.retry-btn:hover {
+  background: #0284c7;
+}
+
+.no-data p {
+  color: #64748b;
+  font-size: 0.9rem;
 }
 
 /* 响应式设计 */

@@ -184,7 +184,7 @@ if __name__ == "__main__":
         # 1. 实例化服务 (会自动加载配置并建立连接)
         service = ChatStorageService()
         
-        new_id = 7
+        new_id = 1
         if new_id:
             # 4. 如果入库成功，执行“出库”操作
         
