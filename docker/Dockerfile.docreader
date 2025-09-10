@@ -1,11 +1,6 @@
-# =========================
-# 构建阶段
-# =========================
-# FROM python:3.10.18-bookworm AS builder
 FROM nvidia/cuda:12.4.1-cudnn8-devel-ubuntu22.04 AS builder
 
 # 切换 apt 源到清华
-# 切换 apt 源
 RUN sed -i 's@http://archive.ubuntu.com@https://mirrors.tuna.tsinghua.edu.cn@g' /etc/apt/sources.list && \
     sed -i 's@http://security.ubuntu.com@https://mirrors.tuna.tsinghua.edu.cn@g' /etc/apt/sources.list
 
@@ -66,7 +61,8 @@ COPY services/docreader/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple 
 RUN pip install --upgrade pip -i https://mirrors.aliyun.com/pypi/simple
 # 安装 PyTorch 
-#从 PyTorch 2.0 左右开始，PyTorch 改变了其分发方式。它不再强依赖于您在系统或 Docker 镜像中预先安装的完整 CUDA 工具包 (CUDA Toolkit)，而是将自己运行所需要的、特定版本的 CUDA 库作为 Python 包依赖项，在安装 torch 时一起安装到您的 Python 环境中。
+# 从 PyTorch 2.0 左右开始，PyTorch 改变了其分发方式。它不再强依赖于您在系统或 Docker 镜像中预先安装的完整 CUDA 工具包 (CUDA Toolkit)，而是将自己运行所需要的
+# 特定版本的 CUDA 库作为 Python 包依赖项，在安装 torch 时一起安装到您的 Python 环境中。
 COPY packages/whl/ /app/wheels/
 RUN pip install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple \
     /app/wheels/torch-2.6.0+cu124-cp310-cp310-linux_x86_64.whl \
