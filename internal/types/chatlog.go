@@ -132,6 +132,7 @@ func (c ChatLogData) SetImageURLs(urls map[string]string) {
 		imageURLsMap = c["image_urls"].(map[string]interface{})
 	}
 	for key, url := range urls {
-		imageURLsMap[key+"_url"] = url
+		// 生成前端ImageGallery组件期望的字段名格式
+		imageURLsMap[key+"_image_url"] = url
 	}
 }

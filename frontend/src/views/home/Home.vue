@@ -71,18 +71,75 @@
             <p>加载失败: {{ chatDBError }}</p>
             <button @click="loadAllChatDBRecords" class="retry-btn">重试</button>
           </div>
-          <div v-else-if="chatDBRecords && chatDBRecords.length > 0" class="chat-records">
-            <div class="records-list">
-              <div 
-                v-for="record in (chatDBRecords || [])" 
-                :key="record.id" 
-                class="record-banner"
+          <div v-else-if="chatDBRecords && chatDBRecords.length > 0" class="chatdb-records-container">
+            <t-space direction="vertical" size="medium" class="chatdb-records-list">
+              <t-card
+                v-for="record in (chatDBRecords || [])"
+                :key="record.id"
+                class="chatdb-record-card"
+                :hover="true"
                 @click="showRecordDetails(record.id)"
               >
-                <span class="record-id">ID: {{ record.id }}</span>
-                <span class="record-date">{{ new Date(record.created_at).toLocaleDateString() }}</span>
-              </div>
-            </div>
+                <template #header>
+                  <div class="chatdb-card-header">
+                    <div class="chatdb-record-id">
+                      <t-icon name="database" class="chatdb-id-icon" />
+                      <span class="chatdb-id-text">#{{ record.id }}</span>
+                    </div>
+                    <t-tag theme="primary" variant="light" size="small">
+                      {{ getRecordStatus(record) }}
+                    </t-tag>
+                  </div>
+                </template>
+                
+                <div class="chatdb-card-content">
+                  <div class="chatdb-record-info">
+                    <div class="chatdb-info-item">
+                      <t-icon name="time" class="chatdb-info-icon" />
+                      <span class="chatdb-info-label">创建时间</span>
+                      <span class="chatdb-info-value">{{ formatRecordDate(record.created_at) }}</span>
+                    </div>
+                    
+                    <div class="chatdb-info-item" v-if="record.user_id">
+                      <t-icon name="user" class="chatdb-info-icon" />
+                      <span class="chatdb-info-label">用户ID</span>
+                      <span class="chatdb-info-value">{{ record.user_id }}</span>
+                    </div>
+                    
+                    <div class="chatdb-info-item" v-if="record.session_id">
+                      <t-icon name="link" class="chatdb-info-icon" />
+                      <span class="chatdb-info-label">会话ID</span>
+                      <span class="chatdb-info-value">{{ record.session_id }}</span>
+                    </div>
+                  </div>
+                  
+                  <div class="chatdb-card-actions">
+                    <t-button 
+                      theme="primary" 
+                      variant="outline" 
+                      size="small"
+                      @click.stop="showRecordDetails(record.id)"
+                    >
+                      <template #icon>
+                        <t-icon name="view" />
+                      </template>
+                      查看详情
+                    </t-button>
+                    <t-button 
+                      theme="default" 
+                      variant="outline" 
+                      size="small"
+                      @click.stop="openChainView(record.id)"
+                    >
+                      <template #icon>
+                        <t-icon name="layers" />
+                      </template>
+                      思维链
+                    </t-button>
+                  </div>
+                </div>
+              </t-card>
+            </t-space>
           </div>
           <div v-else class="no-data">
             <p>暂无数据</p>
@@ -96,7 +153,6 @@
       <div class="modal-content" @click.stop>
         <div class="modal-header">
           <h3>ChatDB 记录详情</h3>
-          <button class="close-btn" @click="closeRecordDetail">×</button>
         </div>
         <div class="modal-body" v-if="selectedRecord">
           <div class="detail-item">
@@ -119,13 +175,11 @@
             <label>会话ID:</label>
             <span>{{ selectedRecord.session_id }}</span>
           </div>
-          <!-- 图片展示区域 -->
-          <ImageGallery :image-refs="selectedRecord.log_data" />
-          
           <div class="detail-item" v-if="selectedRecord.log_data">
             <label>日志数据:</label>
             <pre class="log-data">{{ JSON.stringify(selectedRecord.log_data, null, 2) }}</pre>
           </div>
+          <ImageGallery :image-refs="selectedRecord.log_data" />
         </div>
       </div>
     </div>
@@ -199,11 +253,72 @@ const loadAllChatDBRecords = async () => {
 // 显示记录详情
 const showRecordDetails = async (recordId: number) => {
   try {
+    console.log('=== Home.vue 记录详情加载开始 ===')
+    console.log('Home.vue - 请求记录ID:', recordId)
+    
     const response = await getChatRecordById(recordId)
+    console.log('Home.vue - API响应:', response)
+    console.log('Home.vue - 响应数据类型:', typeof response.data)
+    
     selectedRecord.value = response.data
+    
+    // 详细分析log_data字段
+    if (selectedRecord.value && selectedRecord.value.log_data) {
+      console.log('Home.vue - log_data存在')
+      console.log('Home.vue - log_data类型:', typeof selectedRecord.value.log_data)
+      console.log('Home.vue - log_data内容:', selectedRecord.value.log_data)
+      console.log('Home.vue - log_data键列表:', Object.keys(selectedRecord.value.log_data))
+      
+      // 检查image_urls字段
+      if (selectedRecord.value.log_data.image_urls) {
+        console.log('Home.vue - 发现image_urls字段')
+        console.log('Home.vue - image_urls类型:', typeof selectedRecord.value.log_data.image_urls)
+        console.log('Home.vue - image_urls是否为数组:', Array.isArray(selectedRecord.value.log_data.image_urls))
+        console.log('Home.vue - image_urls内容:', selectedRecord.value.log_data.image_urls)
+        
+        if (Array.isArray(selectedRecord.value.log_data.image_urls)) {
+           console.log('Home.vue - image_urls数组长度:', selectedRecord.value.log_data.image_urls.length)
+           selectedRecord.value.log_data.image_urls.forEach((url: any, index: number) => {
+             console.log(`Home.vue - image_urls[${index}]:`, url)
+           })
+        } else {
+          console.log('Home.vue - image_urls对象键:', Object.keys(selectedRecord.value.log_data.image_urls))
+        }
+      } else {
+        console.log('Home.vue - 未发现image_urls字段')
+      }
+      
+      // 检查image_refs字段
+      if (selectedRecord.value.log_data.image_refs) {
+        console.log('Home.vue - 发现image_refs字段')
+        console.log('Home.vue - image_refs类型:', typeof selectedRecord.value.log_data.image_refs)
+        console.log('Home.vue - image_refs内容:', selectedRecord.value.log_data.image_refs)
+      } else {
+        console.log('Home.vue - 未发现image_refs字段')
+      }
+      
+      // 检查传统图片URL字段
+       const legacyFields = ['depth_image_url', 'original_image_url', 'detection_image_url']
+       legacyFields.forEach(field => {
+         if (selectedRecord.value?.log_data[field]) {
+           console.log(`Home.vue - 发现传统字段 ${field}:`, selectedRecord.value.log_data[field])
+         }
+       })
+      
+      console.log('Home.vue - 即将传递给ImageGallery的数据:', selectedRecord.value.log_data)
+    } else {
+      console.log('Home.vue - log_data不存在或为空')
+    }
+    
+    console.log('=== Home.vue 记录详情加载完成 ===')
     showRecordDetail.value = true
   } catch (error: any) {
-    console.error('Failed to load record details:', error)
+    console.error('Home.vue - 加载记录详情失败:', error)
+    console.error('Home.vue - 错误详情:', {
+      message: error.message,
+      response: error.response,
+      stack: error.stack
+    })
     chatDBError.value = error.response?.data?.message || error.message || '加载记录详情失败'
   }
 }
@@ -212,6 +327,52 @@ const showRecordDetails = async (recordId: number) => {
 const closeRecordDetail = () => {
   showRecordDetail.value = false
   selectedRecord.value = null
+}
+
+// 打开思维链展示页面
+const openChainView = (recordId?: number) => {
+  const id = recordId || selectedRecord.value?.id
+  if (id) {
+    router.push(`/platform/chatdb/record/${id}/chain`)
+  }
+}
+
+// 格式化记录日期
+const formatRecordDate = (dateString: string) => {
+  try {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffTime = Math.abs(now.getTime() - date.getTime())
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    if (diffDays === 1) {
+      return '今天 ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+    } else if (diffDays === 2) {
+      return '昨天 ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+    } else if (diffDays <= 7) {
+      return `${diffDays - 1}天前`
+    } else {
+      return date.toLocaleDateString('zh-CN', { 
+        month: '2-digit', 
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    }
+  } catch (error) {
+    return dateString
+  }
+}
+
+// 获取记录状态
+const getRecordStatus = (record: ChatDBRecord) => {
+  if (record.log_data?.llm_output?.answer) {
+    return '已完成'
+  } else if (record.log_data?.image_urls) {
+    return '处理中'
+  } else {
+    return '待处理'
+  }
 }
 
 
@@ -491,6 +652,7 @@ onMounted(async () => {
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
   color: white;
   font-family: 'Arial', sans-serif;
+  overflow-x: hidden;
 }
 
 /* 主要内容区域 */
@@ -502,16 +664,16 @@ onMounted(async () => {
   padding: 1rem;
   max-width: 1600px;
   margin: 0 auto;
-  height: calc(100vh - 4rem);
+  height: auto; /* 允许根据内容自适应高度，避免底部被裁切 */
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: auto; /* 内容超过时可滚动 */
 }
 
 /* 左侧区域A */
 .left-section {
   display: grid;
-  grid-template-rows: 140px 1fr 180px;
-  gap: 0.6rem;
+  grid-template-rows: 140px 1fr 200px;
+  gap: 1rem;
   height: 100%;
   overflow: hidden;
 }
@@ -520,7 +682,7 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
-  gap: 0.6rem;
+  gap: 1rem;
   height: 100%;
 }
 
@@ -610,8 +772,8 @@ onMounted(async () => {
 /* 中间区域B */
 .center-section {
   display: grid;
-  grid-template-rows: 2fr 1fr;
-  gap: 0.6rem;
+  grid-template-rows: 1fr 200px;
+  gap: 1rem;
   height: 100%;
   overflow: hidden;
 }
@@ -625,8 +787,8 @@ onMounted(async () => {
   box-shadow: 0 4px 16px rgba(0, 212, 255, 0.1);
   display: flex;
   flex-direction: column;
-  height: 100%;
   min-height: 0;
+  overflow: hidden;
 }
 
 .map-container {
@@ -645,8 +807,8 @@ onMounted(async () => {
   box-shadow: 0 4px 16px rgba(0, 212, 255, 0.1);
   display: flex;
   flex-direction: column;
-  height: 100%;
   min-height: 0;
+  overflow: hidden;
 }
 
 .placeholder-content {
@@ -676,48 +838,158 @@ onMounted(async () => {
   box-shadow: 0 4px 16px rgba(0, 212, 255, 0.1);
   display: flex;
   flex-direction: column;
-  height: 100%;
+  min-height: 0;
   overflow: hidden;
 }
 
 /* ChatDB 记录列表样式 */
-.chat-records {
-  max-height: 400px;
+.chatdb-records-container {
+  max-height: 500px;
   overflow-y: auto;
+  padding: 0.5rem;
 }
 
-.records-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.chatdb-records-list {
+  width: 100%;
 }
 
-.record-banner {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  border-radius: 8px;
-  padding: 0.75rem;
+.chatdb-record-card {
+  background: rgba(0, 212, 255, 0.05) !important;
+  border: 1px solid rgba(0, 212, 255, 0.2) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  overflow: hidden;
+}
+
+.chatdb-record-card:hover {
+  background: rgba(0, 212, 255, 0.1) !important;
+  border-color: rgba(0, 212, 255, 0.4) !important;
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 212, 255, 0.2);
+}
+
+.chatdb-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 0.5rem 0;
 }
 
-.record-banner:hover {
-  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+.chatdb-record-id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.record-id {
-  font-weight: bold;
-  color: white;
+.chatdb-id-icon {
+  color: #00d4ff;
+  font-size: 16px;
 }
 
-.record-date {
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.8);
+.chatdb-id-text {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #00d4ff;
+  letter-spacing: 0.5px;
+}
+
+.chatdb-card-content {
+  padding: 0.5rem 0;
+}
+
+.chatdb-record-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.chatdb-info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+}
+
+.chatdb-info-icon {
+  color: #64748b;
+  font-size: 14px;
+  width: 16px;
+  flex-shrink: 0;
+}
+
+.chatdb-info-label {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  min-width: 60px;
+  flex-shrink: 0;
+}
+
+.chatdb-info-value {
+  font-size: 0.85rem;
+  color: #e2e8f0;
+  font-family: 'Courier New', monospace;
+  word-break: break-all;
+  flex: 1;
+}
+
+.chatdb-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+/* TDesign 组件样式覆盖 */
+.chatdb-record-card :deep(.t-card__header) {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.1) !important;
+  padding: 0.75rem 1rem 0.5rem 1rem !important;
+}
+
+.chatdb-record-card :deep(.t-card__body) {
+  background: transparent !important;
+  padding: 0.5rem 1rem 1rem 1rem !important;
+}
+
+.chatdb-record-card :deep(.t-tag) {
+  background: rgba(0, 212, 255, 0.1) !important;
+  border-color: rgba(0, 212, 255, 0.3) !important;
+  color: #00d4ff !important;
+}
+
+.chatdb-record-card :deep(.t-button) {
+  border-radius: 6px !important;
+  font-size: 0.8rem !important;
+  height: 28px !important;
+  padding: 0 12px !important;
+}
+
+.chatdb-record-card :deep(.t-button--theme-primary) {
+  background: rgba(0, 212, 255, 0.1) !important;
+  border-color: rgba(0, 212, 255, 0.3) !important;
+  color: #00d4ff !important;
+}
+
+.chatdb-record-card :deep(.t-button--theme-primary:hover) {
+  background: rgba(0, 212, 255, 0.2) !important;
+  border-color: rgba(0, 212, 255, 0.5) !important;
+  color: #00d4ff !important;
+}
+
+.chatdb-record-card :deep(.t-button--theme-default) {
+  background: rgba(100, 116, 139, 0.1) !important;
+  border-color: rgba(100, 116, 139, 0.3) !important;
+  color: #64748b !important;
+}
+
+.chatdb-record-card :deep(.t-button--theme-default:hover) {
+  background: rgba(100, 116, 139, 0.2) !important;
+  border-color: rgba(100, 116, 139, 0.5) !important;
+  color: #94a3b8 !important;
 }
 
 /* 弹窗样式 */
@@ -901,7 +1173,7 @@ onMounted(async () => {
     grid-template-columns: 280px 1fr 280px;
     max-width: 100%;
     padding: 0.8rem;
-    height: calc(100vh - 3rem);
+    height: auto; /* 小于1400px时同样允许根据内容自适应高度 */
   }
 }
 
@@ -910,21 +1182,25 @@ onMounted(async () => {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto;
     height: auto;
-    gap: 0.8rem;
+    gap: 1rem;
+    padding: 0.8rem;
   }
   
   .left-section {
-    grid-template-rows: auto auto auto;
+    grid-template-rows: 120px auto 180px;
     height: auto;
+    min-height: 500px;
   }
   
   .center-section {
     grid-template-rows: 400px 200px;
     height: auto;
+    min-height: 600px;
   }
   
   .right-section {
     height: 300px;
+    min-height: 300px;
   }
 }
 
@@ -936,23 +1212,180 @@ onMounted(async () => {
   .main-content {
     padding: 0.5rem;
     gap: 0.5rem;
+    height: auto;
   }
   
   .stats-cards {
-    grid-template-columns: 1fr;
-    grid-template-rows: repeat(4, 1fr);
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    height: 100px;
   }
   
   .left-section {
-    grid-template-rows: auto auto auto;
+    grid-template-rows: 100px auto 150px;
+    height: auto;
+    min-height: 400px;
   }
   
   .center-section {
     grid-template-rows: 300px 150px;
+    height: auto;
+    min-height: 450px;
+  }
+  
+  .right-section {
+    height: 250px;
+    min-height: 250px;
+  }
+  
+  /* ChatDB 卡片响应式 */
+  .chatdb-records-container {
+    max-height: 300px;
+  }
+  
+  .chatdb-card-actions {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .chatdb-card-actions .t-button {
+    width: 100%;
+    font-size: 0.75rem !important;
+    height: 24px !important;
+  }
+  
+  .chatdb-info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .chatdb-info-label {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 0.25rem;
+    gap: 0.25rem;
+  }
+  
+  .stats-cards {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    height: 80px;
+    gap: 0.25rem;
+  }
+  
+  .left-section {
+    grid-template-rows: 80px auto 120px;
+    min-height: 350px;
+  }
+  
+  .center-section {
+    grid-template-rows: 250px 120px;
+    min-height: 370px;
   }
   
   .right-section {
     height: 200px;
+    min-height: 200px;
   }
+  
+  .section-title {
+    font-size: 0.8rem;
+  }
+  
+  .stat-number {
+    font-size: 1.2rem;
+  }
+  
+  .stat-label {
+    font-size: 0.6rem;
+  }
+  
+  /* ChatDB 卡片超小屏优化 */
+  .chatdb-records-container {
+    max-height: 250px;
+    padding: 0.25rem;
+  }
+  
+  .chatdb-id-text {
+    font-size: 1rem;
+  }
+  
+  .chatdb-info-value {
+    font-size: 0.75rem;
+  }
+  
+  .chatdb-card-actions .t-button {
+    font-size: 0.7rem !important;
+    height: 22px !important;
+    padding: 0 8px !important;
+  }
+}
+
+/* 思维链按钮样式 */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.chain-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--td-brand-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.chain-btn:hover:not(:disabled) {
+  background: var(--td-brand-color-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.chain-btn:disabled {
+  background: var(--td-bg-color-component-disabled);
+  color: var(--td-text-color-disabled);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.chain-icon {
+  font-size: 16px;
+}
+
+.close-btn {
+  width: 32px;
+  height: 32px;
+  background: var(--td-bg-color-component);
+  color: var(--td-text-color-secondary);
+  border: 1px solid var(--td-border-level-1-color);
+  border-radius: 6px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+  background: var(--td-bg-color-component-hover);
+  color: var(--td-text-color-primary);
 }
 </style>

@@ -76,10 +76,10 @@ instance.interceptors.request.use(
     
     // 更新API Key (如果有)
     if (currentSettings.apiKey) {
-      config.headers["X-Api-Key"] = currentSettings.apiKey;
+      config.headers["X-API-Key"] = currentSettings.apiKey;
     } else {
       // 开发环境默认使用Default Tenant的API Key
-      config.headers["X-Api-Key"] = "sk-9dBU-DIgrLJ0Z4zViR8Pvs55DwG4bpXohScUo-k0nPyiNABf";
+      config.headers["X-API-Key"] = "sk-UUTq-WDA6uj_rbO-1wY0wh7CwvAUXkZSXi2eXcpZ8-PbE6QJ";
     }
     
     config.headers["X-Request-ID"] = `${generateRandomString(12)}`;
