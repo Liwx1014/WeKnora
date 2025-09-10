@@ -27,16 +27,18 @@ temp/
 
 WeKnora
 models/*
+packages/*
 services/docreader/src/proto/__pycache__
 services/docreader/src/parser/__pycache__
 test/data/mswag.txt
 data/files/
-
+1ms-helper
 .python-version
 .venv/
 
 ### macOS
 # General
 .DS_Store
+.gitignore
 
 

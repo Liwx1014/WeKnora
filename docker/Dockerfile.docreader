@@ -1,18 +1,26 @@
-# =========================
-# 构建阶段
-# =========================
-FROM python:3.10.18-bookworm AS builder
+FROM nvidia/cuda:12.4.1-cudnn8-devel-ubuntu22.04 AS builder
 
 # 切换 apt 源到清华
-RUN sed -i 's@http://deb.debian.org@https://mirrors.tuna.tsinghua.edu.cn@g' /etc/apt/sources.list.d/debian.sources && \
-    sed -i 's@http://security.debian.org@https://mirrors.tuna.tsinghua.edu.cn@g' /etc/apt/sources.list.d/debian.sources
+RUN sed -i 's@http://archive.ubuntu.com@https://mirrors.tuna.tsinghua.edu.cn@g' /etc/apt/sources.list && \
+    sed -i 's@http://security.ubuntu.com@https://mirrors.tuna.tsinghua.edu.cn@g' /etc/apt/sources.list
 
 WORKDIR /app
 
+# 安装 Python 3.10 及其开发工具，并设置为默认
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.10 \
+    python3.10-dev \
+    python3.10-distutils \
+    python3-pip \
+    build-essential \
+    software-properties-common \
+    && rm -rf /var/lib/apt/lists/* \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1 
+
 # 安装构建依赖
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
-    python3-dev \
     libjpeg-dev \
     zlib1g-dev \
     libpq-dev \
@@ -23,10 +31,14 @@ RUN apt-get update && apt-get install -y \
     antiword \
     curl \
     unzip \
+    git \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
     && rm -rf /var/lib/apt/lists/*
 
 # 检查是否存在本地protoc安装包，如果存在则离线安装，否则在线安装,其他安装包按需求添加
-COPY packages/ /app/packages/
+COPY packages/protoc-3.19.4-linux-x86_64.zip /app/packages/protoc-3.19.4-linux-x86_64.zip
 RUN echo "检查本地protoc安装包..." && \
     if [ -f "/app/packages/protoc-3.19.4-linux-x86_64.zip" ]; then \
         echo "发现本地protoc安装包，将进行离线安装"; \
@@ -45,15 +57,17 @@ RUN echo "检查本地protoc安装包..." && \
 # 复制依赖文件
 COPY services/docreader/requirements.txt .
 
-# 预下载 MinerU / ModelScope 模型 (PDF-Extract-Kit-1___0)
-# RUN pip install modelscope -i https://pypi.tuna.tsinghua.edu.cn/simple
-# RUN  modelscope download --model 'OpenDataLab/PDF-Extract-Kit-1___0' 
-# # 检查新下载的模型
-# RUN ls -laR /root/.cache/modelscope/hub
-
 # 安装依赖
 RUN pip install --no-cache-dir -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple 
 RUN pip install --upgrade pip -i https://mirrors.aliyun.com/pypi/simple
+# 安装 PyTorch 
+# 从 PyTorch 2.0 左右开始，PyTorch 改变了其分发方式。它不再强依赖于您在系统或 Docker 镜像中预先安装的完整 CUDA 工具包 (CUDA Toolkit)，而是将自己运行所需要的
+# 特定版本的 CUDA 库作为 Python 包依赖项，在安装 torch 时一起安装到您的 Python 环境中。
+COPY packages/whl/ /app/wheels/
+RUN pip install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple \
+    /app/wheels/torch-2.6.0+cu124-cp310-cp310-linux_x86_64.whl \
+    /app/wheels/torchaudio-2.6.0+cu124-cp310-cp310-linux_x86_64.whl \
+    /app/wheels/torchvision-0.21.0+cu124-cp310-cp310-linux_x86_64.whl
 RUN pip install -U "mineru[core]" -i https://mirrors.aliyun.com/pypi/simple 
 # 预下载 PP-OCRv5 模型
 RUN mkdir -p /root/.paddlex/official_models && \
@@ -75,89 +89,31 @@ RUN ls -la /root/.paddlex/official_models
 # 生成 protobuf 代码
 RUN chmod +x /app/scripts/generate_proto.sh && bash /app/scripts/generate_proto.sh
 
-
-# =========================
-# 运行阶段
-# =========================
-FROM python:3.10.18-bookworm AS runner
-
-# 切换 apt 源到清华
-RUN sed -i 's@http://deb.debian.org@https://mirrors.tuna.tsinghua.edu.cn@g' /etc/apt/sources.list.d/debian.sources && \
-    sed -i 's@http://security.debian.org@https://mirrors.tuna.tsinghua.edu.cn@g' /etc/apt/sources.list.d/debian.sources
-
-WORKDIR /app
-
-# 安装运行时依赖
-RUN apt-get update && apt-get install -y \
-    libjpeg62-turbo \
-    libpq5 \
-    wget \
-    gnupg \
-    libgl1 \
-    libglib2.0-0 \
-    antiword \
-    supervisor \
-    vim \
-    tar \
-    dpkg \
-    libxinerama1 \
-    libfontconfig1 \
-    libdbus-glib-1-2 \
-    libcairo2 \
-    libcups2 \
-    libglu1-mesa \
-    libsm6 \
-    libreoffice \
-    && rm -rf /var/lib/apt/lists/*
-
-# # 下载并安装 LibreOffice（区分架构）
-# RUN mkdir -p /tmp/libreoffice && cd /tmp/libreoffice && \
-#     if [ "$(uname -m)" = "x86_64" ]; then \
-#         wget https://mirrors.tuna.tsinghua.edu.cn/libreoffice/libreoffice/stable/25.2.5/deb/x86_64/LibreOffice_25.2.5_Linux_x86-64_deb.tar.gz && \
-#         tar -xzf LibreOffice_25.2.5_Linux_x86-64_deb.tar.gz && \
-#         cd LibreOffice_25.2.5.2_Linux_x86-64_deb/DEBS && dpkg -i *.deb; \
-#     elif [ "$(uname -m)" = "aarch64" ] || [ "$(uname -m)" = "arm64" ]; then \
-#         wget https://mirrors.aliyun.com/libreoffice/testing/25.8.0/deb/aarch64/LibreOffice_25.8.0.3_Linux_aarch64_deb.tar.gz && \
-#         tar -xzf LibreOffice_25.8.0.3_Linux_aarch64_deb.tar.gz && \
-#         cd LibreOffice_25.8.0.3_Linux_aarch64_deb/DEBS && dpkg -i *.deb; \
-#     else \
-#         echo "Unsupported architecture: $(uname -m)" && exit 1; \
-#     fi && \
-#     cd / && rm -rf /tmp/libreoffice
-
-# 设置 LibreOffice 环境变量
-# RUN echo 'export LIBREOFFICE_PATH=/opt/libreoffice25.2/program/soffice' >> /etc/environment;
-    
-# 从构建阶段复制已安装的依赖和生成的代码
-COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
-COPY --from=builder /root/.paddlex/official_models /root/.paddlex/official_models
-COPY --from=builder /app/src /app/src
-
 # 安装 Playwright 浏览器
 RUN python -m playwright install webkit
 RUN python -m playwright install-deps webkit
 
 # 设置 Python 路径
 ENV PYTHONPATH=/app/src
-RUN pip install  "numpy>=1.24,<1.27" "pandas>=1.4.0" -i https://mirrors.aliyun.com/pypi/simple 
 RUN cd /app/src && python -m download_deps
 
 # 创建supervisor配置
+RUN apt-get install -y supervisor
 RUN mkdir -p /etc/supervisor/conf.d
 COPY services/docreader/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 #复制文件
 COPY services/docreader/mineru.json /root/mineru.json
 COPY models/models.tar  /app/models.tar
-# 定义正确的模型仓库目录名 (将 '/' 替换为 '___')
-# ENV MODEL_REPO_DIR=OpenDataLab/PDF-Extract-Kit-1.0
+# 定义正确的模型仓库目录名 
 ENV CACHE_ROOT=/root/.cache/modelscope/hub
 # 解压模型到正确的结构
 RUN mkdir -p ${CACHE_ROOT}
 RUN tar -xzvf /app/models.tar -C ${CACHE_ROOT}
 RUN rm -f /app/models.tar
-
+#配置MinerU环境变量
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV MINERU_DEVICE_MODE=cuda
 # 暴露 gRPC 端口
 EXPOSE 50051
 
