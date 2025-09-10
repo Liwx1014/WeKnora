@@ -93,6 +93,9 @@ RUN chmod +x /app/scripts/generate_proto.sh && bash /app/scripts/generate_proto.
 RUN python -m playwright install webkit
 RUN python -m playwright install-deps webkit
 
+#Numpy&&Pandas兼容 MinerU 要求numpy >=1.21.6 PaddleX 要求numpy >=1.24
+RUN pip install numpy==1.24.4 pandas==2.0.3 -i https://mirrors.aliyun.com/pypi/simple 
+
 # 设置 Python 路径
 ENV PYTHONPATH=/app/src
 RUN cd /app/src && python -m download_deps
