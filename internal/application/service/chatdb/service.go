@@ -82,33 +82,54 @@ func (s *ChatDBService) GetChatRecordByID(ctx context.Context, recordID int) (*t
 		return nil, fmt.Errorf("failed to query chat record: %w", err)
 	}
 
-	// Check if the record contains image references
-	imageRef := chatLog.LogData.GetImageReference()
-	if imageRef != nil && (imageRef.ObjectName != "" || imageRef.Key != "") {
-		// Determine the object name (prefer ObjectName, fallback to Key)
-		objectName := imageRef.ObjectName
-		if objectName == "" {
-			objectName = imageRef.Key
+	// Check if the record contains image references (support both single and multiple images)
+	imageRefs := chatLog.LogData.GetImageReferences()
+	if len(imageRefs) > 0 {
+		imageURLs := make(map[string]string)
+		
+		for refKey, imageRef := range imageRefs {
+			if imageRef == nil || (imageRef.ObjectName == "" && imageRef.Key == "") {
+				continue
+			}
+			
+			// Determine the object name (prefer ObjectName, fallback to Key)
+			objectName := imageRef.ObjectName
+			if objectName == "" {
+				objectName = imageRef.Key
+			}
+
+			// Determine the bucket name (prefer from imageRef, fallback to service default)
+			bucketName := imageRef.Bucket
+			if bucketName == "" {
+				bucketName = s.bucketName
+			}
+
+			logger.GetLogger(ctx).Infof("Generating presigned URL for image '%s': bucket=%s, object=%s", refKey, bucketName, objectName)
+
+			// Generate presigned URL with 12 hours expiration
+			presignedURL, err := s.minioClient.PresignedGetObject(ctx, bucketName, objectName, 12*time.Hour, nil)
+			if err != nil {
+				logger.GetLogger(ctx).Errorf("Failed to generate presigned URL for image '%s': %v", refKey, err)
+				// Don't fail the entire request, just log the error and continue without this image URL
+				imageURLs[refKey] = ""
+			} else {
+				// Store the presigned URL
+				imageURLs[refKey] = presignedURL.String()
+				logger.GetLogger(ctx).Infof("Generated presigned URL for image '%s': %s", refKey, objectName)
+			}
 		}
-
-		// Determine the bucket name (prefer from imageRef, fallback to service default)
-		bucketName := imageRef.Bucket
-		if bucketName == "" {
-			bucketName = s.bucketName
+		
+		// Set all image URLs in the log data
+		if len(imageURLs) > 0 {
+			chatLog.LogData.SetImageURLs(imageURLs)
 		}
-
-		logger.GetLogger(ctx).Infof("Generating presigned URL for image: bucket=%s, object=%s", bucketName, objectName)
-
-		// Generate presigned URL with 12 hours expiration
-		presignedURL, err := s.minioClient.PresignedGetObject(ctx, bucketName, objectName, 12*time.Hour, nil)
-		if err != nil {
-			logger.GetLogger(ctx).Errorf("Failed to generate presigned URL: %v", err)
-			// Don't fail the entire request, just log the error and continue without the image URL
-			chatLog.LogData.SetImageURL("")
-		} else {
-			// Set the presigned URL in the log data
-			chatLog.LogData.SetImageURL(presignedURL.String())
-			logger.GetLogger(ctx).Infof("Generated presigned URL for image: %s", objectName)
+		
+		// For backward compatibility, also set single image URL if there's only one image
+		if len(imageURLs) == 1 {
+			for _, url := range imageURLs {
+				chatLog.LogData.SetImageURL(url)
+				break
+			}
 		}
 	}
 

@@ -119,6 +119,9 @@
             <label>会话ID:</label>
             <span>{{ selectedRecord.session_id }}</span>
           </div>
+          <!-- 图片展示区域 -->
+          <ImageGallery :image-refs="selectedRecord.log_data" />
+          
           <div class="detail-item" v-if="selectedRecord.log_data">
             <label>日志数据:</label>
             <pre class="log-data">{{ JSON.stringify(selectedRecord.log_data, null, 2) }}</pre>
@@ -134,6 +137,7 @@ import { ref, reactive, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import AMapLoader from '@amap/amap-jsapi-loader'
 import { getChatRecordById, getAllChatRecords, type ChatDBRecord, type ChatDBListResponse } from '@/api/chatdb/index'
+import ImageGallery from '@/components/ImageGallery.vue'
 
 const router = useRouter()
 
@@ -209,6 +213,8 @@ const closeRecordDetail = () => {
   showRecordDetail.value = false
   selectedRecord.value = null
 }
+
+
 
 // 饼图数据
 const pieData = {
@@ -886,6 +892,8 @@ onMounted(async () => {
   color: #64748b;
   font-size: 0.9rem;
 }
+
+
 
 /* 响应式设计 */
 @media (max-width: 1400px) {

@@ -55,7 +55,7 @@ type ImageReference struct {
 	Key        string `json:"key"` // Alternative field name used in Python script
 }
 
-// GetImageReference extracts image reference from ChatLogData
+// GetImageReference extracts image reference from ChatLogData (legacy single image support)
 func (c ChatLogData) GetImageReference() *ImageReference {
 	if imageRef, ok := c["image_ref"]; ok {
 		if refMap, ok := imageRef.(map[string]interface{}); ok {
@@ -76,7 +76,62 @@ func (c ChatLogData) GetImageReference() *ImageReference {
 	return nil
 }
 
-// SetImageURL sets the image URL in ChatLogData
+// GetImageReferences extracts multiple image references from ChatLogData
+func (c ChatLogData) GetImageReferences() map[string]*ImageReference {
+	result := make(map[string]*ImageReference)
+	
+	// Check for image_refs field (multiple images)
+	if imageRefs, ok := c["image_refs"]; ok {
+		if refsMap, ok := imageRefs.(map[string]interface{}); ok {
+			for refKey, refValue := range refsMap {
+				if refMap, ok := refValue.(map[string]interface{}); ok {
+					ref := &ImageReference{}
+					if bucket, ok := refMap["bucket"].(string); ok {
+						ref.Bucket = bucket
+					}
+					if objectName, ok := refMap["object_name"].(string); ok {
+						ref.ObjectName = objectName
+					}
+					if key, ok := refMap["key"].(string); ok {
+						ref.Key = key
+						if ref.ObjectName == "" {
+							ref.ObjectName = key // Use key as object_name if object_name is not set
+						}
+					}
+					if ref.ObjectName != "" || ref.Key != "" {
+						result[refKey] = ref
+					}
+				}
+			}
+		}
+	}
+	
+	// Fallback to single image_ref for backward compatibility
+	if len(result) == 0 {
+		if singleRef := c.GetImageReference(); singleRef != nil {
+			result["image"] = singleRef
+		}
+	}
+	
+	return result
+}
+
+// SetImageURL sets the image URL in ChatLogData (legacy single image support)
 func (c ChatLogData) SetImageURL(url string) {
 	c["image_url"] = url
+}
+
+// SetImageURLs sets multiple image URLs in ChatLogData
+func (c ChatLogData) SetImageURLs(urls map[string]string) {
+	if c["image_urls"] == nil {
+		c["image_urls"] = make(map[string]interface{})
+	}
+	imageURLsMap, ok := c["image_urls"].(map[string]interface{})
+	if !ok {
+		c["image_urls"] = make(map[string]interface{})
+		imageURLsMap = c["image_urls"].(map[string]interface{})
+	}
+	for key, url := range urls {
+		imageURLsMap[key+"_url"] = url
+	}
 }
