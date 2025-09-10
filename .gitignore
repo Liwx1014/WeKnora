@@ -1,5 +1,3 @@
-# 忽略.env文件和其他包含敏感信息的配置文件
-.env
 # 但不忽略示例文件
 !.env.example
 *.pem
@@ -28,6 +26,7 @@ temp/
 WeKnora
 models/*
 packages/*
+packages/whl/*
 services/docreader/src/proto/__pycache__
 services/docreader/src/parser/__pycache__
 test/data/mswag.txt

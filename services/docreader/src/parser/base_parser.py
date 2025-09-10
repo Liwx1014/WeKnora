@@ -102,7 +102,7 @@ class BaseParser(ABC):
         ocr_backend: str = "paddle",
         ocr_config: dict = None,
         max_image_size: int = 1920,  # Maximum image size
-        max_concurrent_tasks: int = 5,  # Max concurrent tasks
+        max_concurrent_tasks: int = 1,  # Max concurrent tasks
         max_chunks: int = 1000,  # Max number of returned chunks
         chunking_config: ChunkingConfig = None,  # Chunking configuration object
     ):
@@ -404,7 +404,7 @@ class BaseParser(ABC):
             return []
 
         # Set max concurrency, reduce concurrency to avoid resource contention
-        max_concurrency = min(self.max_concurrent_tasks, 5)  # Reduce concurrency to prevent excessive memory usage
+        max_concurrency = min(self.max_concurrent_tasks, 1)  # Reduce concurrency to prevent excessive memory usage
 
         # Use semaphore to limit concurrency
         semaphore = asyncio.Semaphore(max_concurrency)
