@@ -7,6 +7,12 @@ docker exec -it WeKnora-app tail -f /var/log/WeKnora.log
 
 # 查看 文档解析模块 日志
 docker exec -it WeKnora-docreader tail -f /var/log/docreader.log
+
+# 查看数据库表结构
+docker exec -it WeKnora-postgres psql -U admin -d lsdb -c "\d chat_service.logs"
+
+# 查看数据库记录
+docker exec WeKnora-app curl -v -X GET "http://localhost:8080/api/v1/chatdb/record/1" -H "accept: application/json" -H "X-Api-Key: sk-9dBU-DIgrLJ0Z4zViR8Pvs55DwG4bpXohScUo-k0nPyiNABf"
 ```
 
 ## 2. 如何启动和停止服务？

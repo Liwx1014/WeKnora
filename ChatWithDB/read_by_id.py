@@ -153,23 +153,38 @@ class ChatStorageService:
                     "created_at": record[5].isoformat()
                 }
 
-                # 检查记录中是否包含图片引用，如果有，则生成预签名URL
-                image_ref = result.get("log_data", {}).get("image_ref")
-                if image_ref and image_ref.get("object_name"):
-                    try:
-                        # 生成一个有效期为12小时的预签名URL (pre-signed URL)
-                        presigned_url = self.minio_client.get_presigned_url(
-                            "GET",
-                            image_ref["bucket"],
-                            image_ref["object_name"],
-                            expires=timedelta(hours=12)
-                        )
-                        # 将可访问的URL添加到返回结果中，供前端直接使用
-                        result["log_data"]["image_url"] = presigned_url
-                        print(f"已为图片 '{image_ref['object_name']}' 生成临时访问URL。")
-                    except S3Error as exc:
-                        print(f"从MinIO生成预签名URL失败: {exc}")
-                        result["log_data"]["image_url"] = None
+                # 检查记录中是否包含图片引用（支持多个图片）
+                image_refs = result.get("log_data", {}).get("image_refs")
+                if image_refs:  # 当存在图片引用时（非空字典）
+                    # 初始化存储图片URL的字段（兼容旧数据格式）
+                    result["log_data"]["image_urls"] = {}
+                    
+                    # 遍历每个图片引用（如depth/original/detection等）
+                    for ref_key, ref_info in image_refs.items():
+                        # 提取关键信息（object_name和bucket是生成URL的必要字段）
+                        object_name = ref_info.get("object_name")
+                        bucket = ref_info.get("bucket")
+                        
+                        if not (object_name and bucket):
+                            print(f"图片引用 '{ref_key}' 缺少必要字段（object_name或bucket），跳过生成URL。")
+                            result["log_data"]["image_urls"][f"{ref_key}_url"] = None
+                            continue
+                        
+                        try:
+                            # 生成12小时有效的预签名URL
+                            presigned_url = self.minio_client.get_presigned_url(
+                                "GET",
+                                bucket,
+                                object_name,
+                                expires=timedelta(hours=12)
+                            )
+                            # 以"原引用键_url"的格式存储URL（如depth_url/original_url）
+                            result["log_data"]["image_urls"][f"{ref_key}_url"] = presigned_url
+                            print(f"成功为图片 '{object_name}'（引用键：{ref_key}）生成临时访问URL。")
+                        except S3Error as exc:
+                            error_msg = f"为图片 '{object_name}'（引用键：{ref_key}）生成预签名URL失败: {exc}"
+                            print(error_msg)
+                            result["log_data"]["image_urls"][f"{ref_key}_url"] = None
 
                 return result
         except Exception as exc:
@@ -184,7 +199,7 @@ if __name__ == "__main__":
         # 1. 实例化服务 (会自动加载配置并建立连接)
         service = ChatStorageService()
         
-        new_id = 7
+        new_id = 1
         if new_id:
             # 4. 如果入库成功，执行“出库”操作
         

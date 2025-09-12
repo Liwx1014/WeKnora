@@ -77,6 +77,9 @@ instance.interceptors.request.use(
     // 更新API Key (如果有)
     if (currentSettings.apiKey) {
       config.headers["X-API-Key"] = currentSettings.apiKey;
+    } else {
+      // 开发环境默认使用Default Tenant的API Key
+      config.headers["X-API-Key"] = "sk-UUTq-WDA6uj_rbO-1wY0wh7CwvAUXkZSXi2eXcpZ8-PbE6QJ";
     }
     
     config.headers["X-Request-ID"] = `${generateRandomString(12)}`;
@@ -99,7 +102,31 @@ instance.interceptors.response.use(
     if (!error.response) {
       return Promise.reject({ message: "网络错误，请检查您的网络连接" });
     }
-    const { data } = error.response;
+    const { status, data } = error.response;
+    
+    // 处理特定的HTTP状态码
+    if (status === 401) {
+      return Promise.reject({ 
+        error: "认证失败", 
+        message: "API Key无效或已过期，请检查设置中的API Key配置" 
+      });
+    } else if (status === 403) {
+      return Promise.reject({ 
+        error: "权限不足", 
+        message: "当前API Key没有访问此资源的权限" 
+      });
+    } else if (status === 404) {
+      return Promise.reject({ 
+        error: "资源不存在", 
+        message: "请求的资源不存在" 
+      });
+    } else if (status >= 500) {
+      return Promise.reject({ 
+        error: "服务器错误", 
+        message: "服务器内部错误，请稍后重试" 
+      });
+    }
+    
     return Promise.reject(data);
   }
 );

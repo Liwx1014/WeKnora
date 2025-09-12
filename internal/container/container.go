@@ -25,6 +25,7 @@ import (
 	postgresRepo "github.com/Tencent/WeKnora/internal/application/repository/retriever/postgres"
 	"github.com/Tencent/WeKnora/internal/application/service"
 	chatpipline "github.com/Tencent/WeKnora/internal/application/service/chat_pipline"
+	"github.com/Tencent/WeKnora/internal/application/service/chatdb"
 	"github.com/Tencent/WeKnora/internal/application/service/file"
 	"github.com/Tencent/WeKnora/internal/application/service/retriever"
 	"github.com/Tencent/WeKnora/internal/config"
@@ -91,6 +92,7 @@ func BuildContainer(container *dig.Container) *dig.Container {
 	must(container.Provide(service.NewModelService))
 	must(container.Provide(service.NewDatasetService))
 	must(container.Provide(service.NewEvaluationService))
+	must(container.Provide(chatdb.NewChatDBService))
 
 	// Chat pipeline components for processing chat requests
 	must(container.Provide(chatpipline.NewEventManager))
@@ -117,6 +119,7 @@ func BuildContainer(container *dig.Container) *dig.Container {
 	must(container.Provide(handler.NewModelHandler))
 	must(container.Provide(handler.NewEvaluationHandler))
 	must(container.Provide(handler.NewInitializationHandler))
+	must(container.Provide(handler.NewChatDBHandler))
 
 	// Router configuration
 	must(container.Provide(router.NewRouter))

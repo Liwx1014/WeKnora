@@ -1,0 +1,428 @@
+// ChatDB思维链样式文件
+
+// 主容器样式
+.chatdb-chain-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--td-bg-color-page);
+  
+  .chain-header {
+    padding: 20px;
+    background: var(--td-bg-color-container);
+    border-bottom: 1px solid var(--td-border-level-1-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      
+      .header-title {
+        h2 {
+          margin: 0;
+          color: var(--td-text-color-primary);
+          font-size: 24px;
+          font-weight: 600;
+        }
+        
+        .record-info {
+          margin-top: 8px;
+          color: var(--td-text-color-secondary);
+          font-size: 14px;
+          
+          .record-id {
+            font-weight: 600;
+            color: var(--td-brand-color);
+          }
+        }
+      }
+      
+      .header-actions {
+        display: flex;
+        gap: 12px;
+      }
+    }
+  }
+  
+  .chain-content {
+    flex: 1;
+    padding: 20px;
+    overflow: auto;
+  }
+}
+
+// 步骤导航样式
+.step-navigation {
+  .t-steps {
+    .t-step {
+      cursor: pointer;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        .t-step__title {
+          color: var(--td-brand-color);
+        }
+      }
+      
+      &.t-step--current {
+        .t-step__title {
+          color: var(--td-brand-color);
+          font-weight: 600;
+        }
+      }
+      
+      &.t-step--finish {
+        .t-step__icon {
+          background: var(--td-success-color);
+          color: white;
+        }
+      }
+      
+      &.t-step--error {
+        .t-step__icon {
+          background: var(--td-error-color);
+          color: white;
+        }
+      }
+    }
+  }
+}
+
+// 步骤控制按钮样式
+.step-controls {
+  .t-button {
+    min-width: 100px;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+// 步骤内容样式
+.step-content {
+  .t-card {
+    border: 1px solid var(--td-border-level-1-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+    
+    &:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+  }
+}
+
+// 图像容器样式
+.image-container {
+  .image-card {
+    .t-card__body {
+      padding: 0;
+    }
+  }
+  
+  img {
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: scale(1.02);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+  }
+}
+
+// 数据表格样式
+.data-section {
+  .t-table {
+    .t-table__row {
+      transition: background-color 0.2s ease;
+      
+      &:hover {
+        background-color: var(--td-bg-color-container-hover);
+      }
+      
+      &.t-table__row--current {
+        background-color: var(--td-brand-color-light);
+      }
+    }
+  }
+}
+
+// 空状态样式
+.empty-state,
+.no-data {
+  .t-empty {
+    .t-empty__description {
+      color: var(--td-text-color-placeholder);
+    }
+  }
+}
+
+// 动画效果
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// 步骤切换动画
+.step-fade-enter-active {
+  animation: fadeInUp 0.3s ease;
+}
+
+.step-fade-leave-active {
+  animation: fadeInUp 0.3s ease reverse;
+}
+
+// 加载状态样式
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--td-border-level-1-color);
+    border-top: 4px solid var(--td-brand-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// 错误状态样式
+.error-state {
+  .error-message {
+    color: var(--td-error-color);
+    text-align: center;
+    padding: 20px;
+    
+    .error-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+    
+    .error-text {
+      font-size: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .retry-button {
+      margin-top: 16px;
+    }
+  }
+}
+
+// 响应式设计
+@media (max-width: 1200px) {
+  .chatdb-chain-container {
+    .chain-header {
+      padding: 16px;
+      
+      .header-content {
+        .header-title h2 {
+          font-size: 20px;
+        }
+      }
+    }
+    
+    .chain-content {
+      padding: 16px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .chatdb-chain-container {
+    .chain-header {
+      padding: 12px;
+      
+      .header-content {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+        
+        .header-actions {
+          width: 100%;
+          justify-content: flex-end;
+        }
+      }
+    }
+    
+    .chain-content {
+      padding: 12px;
+    }
+  }
+  
+  .step-navigation {
+    .t-steps {
+      .t-step {
+        .t-step__title {
+          font-size: 14px;
+        }
+        
+        .t-step__description {
+          font-size: 12px;
+        }
+      }
+    }
+  }
+  
+  .step-controls {
+    .t-button {
+      min-width: 80px;
+      font-size: 14px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .chatdb-chain-container {
+    .chain-header {
+      padding: 8px;
+      
+      .header-content {
+        .header-title h2 {
+          font-size: 18px;
+        }
+        
+        .record-info {
+          font-size: 12px;
+        }
+      }
+    }
+    
+    .chain-content {
+      padding: 8px;
+    }
+  }
+  
+  .step-controls {
+    flex-direction: column;
+    gap: 8px;
+    
+    .t-button {
+      width: 100%;
+    }
+  }
+}
+
+// 深色主题适配
+@media (prefers-color-scheme: dark) {
+  .loading-overlay {
+    background: rgba(0, 0, 0, 0.8);
+  }
+}
+
+// 打印样式
+@media print {
+  .chatdb-chain-container {
+    .chain-header {
+      .header-actions {
+        display: none;
+      }
+    }
+    
+    .step-controls {
+      display: none;
+    }
+    
+    .step-content {
+      .t-card {
+        box-shadow: none;
+        border: 1px solid #ccc;
+      }
+    }
+  }
+}
+
+// 高对比度模式
+@media (prefers-contrast: high) {
+  .chatdb-chain-container {
+    .step-content {
+      .t-card {
+        border: 2px solid var(--td-text-color-primary);
+      }
+    }
+  }
+  
+  .step-navigation {
+    .t-steps {
+      .t-step {
+        .t-step__icon {
+          border: 2px solid var(--td-text-color-primary);
+        }
+      }
+    }
+  }
+}
+
+// 减少动画模式
+@media (prefers-reduced-motion: reduce) {
+  .step-fade-enter-active,
+  .step-fade-leave-active {
+    animation: none;
+    transition: opacity 0.1s ease;
+  }
+  
+  .t-button {
+    transition: none;
+    
+    &:hover {
+      transform: none;
+    }
+  }
+  
+  img {
+    transition: none;
+    
+    &:hover {
+      transform: none;
+    }
+  }
+}
