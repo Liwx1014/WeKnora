@@ -102,7 +102,7 @@ class BaseParser(ABC):
         ocr_backend: str = "paddle",
         ocr_config: dict = None,
         max_image_size: int = 1920,  # Maximum image size
-        max_concurrent_tasks: int = 5,  # Max concurrent tasks
+        max_concurrent_tasks: int = 1,  # Max concurrent tasks
         max_chunks: int = 1000,  # Max number of returned chunks
         chunking_config: ChunkingConfig = None,  # Chunking configuration object
     ):
@@ -404,7 +404,7 @@ class BaseParser(ABC):
             return []
 
         # Set max concurrency, reduce concurrency to avoid resource contention
-        max_concurrency = min(self.max_concurrent_tasks, 5)  # Reduce concurrency to prevent excessive memory usage
+        max_concurrency = min(self.max_concurrent_tasks, 1)  # Reduce concurrency to prevent excessive memory usage
 
         # Use semaphore to limit concurrency
         semaphore = asyncio.Semaphore(max_concurrency)
@@ -1056,14 +1056,6 @@ class BaseParser(ABC):
         Returns:
             Processed Chunk object
         """
-        # Set request ID context in the asynchronous task
-        try:
-            if current_request_id:
-                from utils.request import set_request_id
-                set_request_id(current_request_id)
-                logger.info(f"Chunk processing task #{chunk_idx+1} setting request ID: {current_request_id}")
-        except Exception as e:
-            logger.warning(f"Failed to set request ID in Chunk processing task: {str(e)}")
             
         logger.info(f"Starting to process images in Chunk #{chunk_idx+1}/{total_chunks}")
         
@@ -1160,7 +1152,7 @@ class BaseParser(ABC):
         # Create and run all Chunk concurrent processing tasks
         async def process_all_chunks():
             # Set max concurrency, reduce concurrency to avoid resource contention
-            max_concurrency = min(self.max_concurrent_tasks, 5)  # Reduce concurrency
+            max_concurrency = min(self.max_concurrent_tasks, 1)  # Reduce concurrency
             # Use semaphore to limit concurrency
             semaphore = asyncio.Semaphore(max_concurrency)
             

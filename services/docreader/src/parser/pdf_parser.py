@@ -181,7 +181,6 @@ class PDFParser(BaseParser):
                 return ""
 
             # 3. 从中间格式生成最终的内容列表
-            # MakeMode.CONTENT_LIST 会返回一个结构化的列表，比直接生成md字符串更容易处理
             content_list = pipeline_union_make(
                 pdf_info, 
                 MakeMode.MM_MD, 
@@ -191,7 +190,7 @@ class PDFParser(BaseParser):
             final_text_markdown = self._convert_embedded_html_tables(content_list)
             #final_text_markdown = self._convert_embedded_latex(final_text_markdown)
 
-            #logger.info(f"PDF parsing with MinerU complete. Extracted {len(final_text_markdown)} text chars.")
+            logger.info(f"PDF parsing with MinerU complete. Extracted {len(final_text_markdown)} text chars.")
             #logger.info(f"Sample text: {final_text_markdown}...")exit
             return final_text_markdown
 
