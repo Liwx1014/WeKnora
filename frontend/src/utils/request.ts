@@ -50,11 +50,12 @@ const instance = axios.create({
 // 设置测试数据
 export function setTestData(data: typeof testData) {
   testData = data;
-  if (data) {
-    // 优先使用设置中的ApiKey，如果没有则使用测试数据中的
-    const apiKey = settings.apiKey || (data?.tenant?.api_key || "");
-    if (apiKey) {
-      instance.defaults.headers["X-API-Key"] = apiKey;
+  if (data?.tenant?.api_key) {
+    // 只有在用户没有手动设置API Key时，才使用测试数据中的API Key
+    const currentSettings = getSettings();
+    if (!currentSettings.apiKey) {
+      instance.defaults.headers["X-API-Key"] = data.tenant.api_key;
+      console.log('已自动设置API Key:', data.tenant.api_key);
     }
   }
 }
@@ -74,13 +75,14 @@ instance.interceptors.request.use(
       config.baseURL = currentSettings.endpoint;
     }
     
-    // 更新API Key (如果有)
+    // 更新API Key (优先级：用户设置 > 测试数据 > 无)
     if (currentSettings.apiKey) {
       config.headers["X-API-Key"] = currentSettings.apiKey;
-    } else {
-      // 开发环境默认使用Default Tenant的API Key
-      config.headers["X-API-Key"] = "sk-UUTq-WDA6uj_rbO-1wY0wh7CwvAUXkZSXi2eXcpZ8-PbE6QJ";
+    } else if (testData?.tenant?.api_key) {
+      // 使用测试数据中的API Key
+      config.headers["X-API-Key"] = testData.tenant.api_key;
     }
+    // 如果都没有，则不设置API Key，让后端返回401错误
     
     config.headers["X-Request-ID"] = `${generateRandomString(12)}`;
     return config;
@@ -106,10 +108,18 @@ instance.interceptors.response.use(
     
     // 处理特定的HTTP状态码
     if (status === 401) {
-      return Promise.reject({ 
-        error: "认证失败", 
-        message: "API Key无效或已过期，请检查设置中的API Key配置" 
-      });
+      // 检查是否已加载测试数据
+      if (!testData?.tenant?.api_key) {
+        return Promise.reject({ 
+          error: "认证失败", 
+          message: "系统正在初始化API Key，请稍后重试。如果问题持续存在，请检查系统配置。" 
+        });
+      } else {
+        return Promise.reject({ 
+          error: "认证失败", 
+          message: "API Key无效或已过期，请检查设置中的API Key配置" 
+        });
+      }
     } else if (status === 403) {
       return Promise.reject({ 
         error: "权限不足", 
