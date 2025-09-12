@@ -1,7 +1,7 @@
 <template>
     <div class="header_box tech-header">
         <div class="logo_box">
-            <span class="logo_text">灵枢智联（LineAegis）：云边一体的智能巡检与风险处置引擎</span>
+            <span class="logo_text">灵枢智联·安巡（LineAegis）：云边一体的智能巡检与风险处置引擎</span>
         </div>
         <div class="nav_box">
             <div class="menu_items">

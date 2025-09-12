@@ -140,7 +140,6 @@ build_frontend_image() {
     cd "$PROJECT_ROOT"
     
     docker build \
-        --no-cache \
         --platform $PLATFORM \
         -f frontend/Dockerfile \
         -t wechatopenai/weknora-ui:latest \

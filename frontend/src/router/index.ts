@@ -58,12 +58,6 @@ const router = createRouter({
           component: () => import("../views/initialization/InitializationConfig.vue"),
           meta: { requiresInit: false } // 初始化页面不需要检查初始化状态
         },
-        {
-          path: "chatdb/record/:id/chain",
-          name: "chatdb-chain",
-          component: () => import("../views/chatdb/RecordDetailChain.vue"),
-          meta: { requiresInit: true }
-        },
       ],
     },
   ],
