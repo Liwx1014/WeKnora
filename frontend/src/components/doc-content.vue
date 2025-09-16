@@ -152,8 +152,8 @@ const handleDetailsScroll = () => {
       </div>
       <div v-if="details.md.length == 0" class="no_content">暂无数据</div>
       <div v-else class="content" v-for="(item, index) in details.md" :key="index" :style="index % 2 !== 0
-        ? 'background: #07c05f26;'
-        : 'background: #3032360f;'
+        ? 'background:rgb(218, 241, 234);'
+        : 'background:rgb(215, 243, 232);'
         ">
         <div class="md-content" v-html="processMarkdown(item.content)"></div>
       </div>
@@ -164,26 +164,44 @@ const handleDetailsScroll = () => {
     <picturePreview :reviewImg="reviewImg" :reviewUrl="reviewUrl" @closePreImg="closePreImg"></picturePreview>
   </div>
 </template>
+<!-- 将你原来的 <style scoped lang="less"> 标签内容完整替换为这个 -->
 <style scoped lang="less">
 @import "./css/markdown.less";
 
+/* TDesign 抽屉组件样式覆盖 */
 :deep(.t-drawer .t-drawer__content-wrapper) {
   width: 654px !important;
+  /* 明确设置背景为白色 */
+  background-color: #ffffff; 
 }
 
 :deep(.t-drawer__header) {
   font-weight: 800;
+  /* 设置头部背景、文字颜色和下边框 */
+  background-color:rgb(218, 238, 227);
+  color: #1a1a1a;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-:deep(.t-drawer__body.narrow-scrollbar) {
+:deep(.t-drawer__body) {
   padding: 16px 24px;
+  color: #333333; /* 设置内容区域的默认文字颜色 */
 }
+
+:deep(.t-drawer__footer) {
+  /* 设置脚部背景和上边框 */
+  background-color:rgb(45, 65, 48);
+  border-top: 1px solid #f0f0f0;
+}
+
+/* --- 以下是组件内部元素的浅色样式 --- */
 
 .content {
   word-break: break-word;
   padding: 4px;
   gap: 4px;
   margin-top: 12px;
+  border-radius: 4px;
 }
 
 .doc_box {
@@ -192,17 +210,13 @@ const handleDetailsScroll = () => {
 }
 
 .label {
-  color: #000000e6;
+  /* 设置标签文字颜色为深灰色 */
+  color: rgba(0, 0, 0, 0.85);
   font-size: 14px;
   font-style: normal;
   font-weight: 500;
   line-height: 22px;
   margin-bottom: 8px;
-}
-
-/* 确保标签文字在科技主题下清晰可见 */
-:root[theme-mode="tech-dark"] .label {
-  color: var(--tech-text-primary) !important;
 }
 
 .download_box {
@@ -216,24 +230,20 @@ const handleDetailsScroll = () => {
   padding: 5px 8px;
   align-items: center;
   border-radius: 3px;
+  /* 设置浅色边框和背景 */
   border: 1px solid #dcdcdc;
-  background: #30323605;
+  background: #f5f5f5;
   word-break: break-all;
   text-align: justify;
-  color: #000000e6;
-}
-
-/* 确保文档标题在科技主题下清晰可见 */
-:root[theme-mode="tech-dark"] .doc_t {
-  color: var(--tech-text-primary) !important;
-  background: var(--tech-bg-secondary) !important;
-  border-color: var(--tech-border) !important;
+  /* 设置文档标题文字颜色 */
+  color: rgba(0, 0, 0, 0.85);
 }
 
 .icon_box {
   margin-left: 18px;
   display: flex;
   overflow: hidden;
+  /* 下载图标保持品牌绿色 */
   color: #07c05f;
 
   .download_box {
@@ -252,47 +262,22 @@ const handleDetailsScroll = () => {
 
 .time {
   margin-left: 12px;
-  color: #00000066;
+  /* 设置时间文字为较浅的灰色 */
+  color: rgba(0, 0, 0, 0.45);
   font-size: 12px;
   font-style: normal;
   font-weight: 400;
   line-height: 20px;
 }
 
-/* 确保时间文字在科技主题下清晰可见 */
-:root[theme-mode="tech-dark"] .time {
-  color: var(--tech-text-secondary) !important;
-}
-
 .no_content {
   margin-top: 12px;
-  color: #00000066;
+  color: rgba(0, 0, 0, 0.45);
   font-size: 12px;
   padding: 16px;
-  background: #fbfbfb;
-}
-
-/* 科技风格文档内容适配 */
-:root[theme-mode="tech-dark"] .doc-content {
-  background: var(--tech-bg-card) !important;
-  border: 1px solid var(--tech-border);
-  box-shadow: var(--tech-shadow-card);
-
-  .content_header {
-    color: var(--tech-text-primary);
-  }
-
-  .time {
-    color: var(--tech-text-muted) !important;
-  }
-
-  .no_content {
-    color: var(--tech-text-muted) !important;
-    background: var(--tech-bg-secondary) !important;
-  }
-
-  .doc-content-text {
-    color: var(--tech-text-primary) !important;
-  }
+  /* 设置“暂无数据”的浅色背景 */
+  background: #fafafa;
+  text-align: center;
+  border-radius: 4px;
 }
 </style>

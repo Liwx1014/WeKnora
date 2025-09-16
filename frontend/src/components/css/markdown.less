@@ -187,49 +187,47 @@
     }
 
     table {
-        padding: 0;
-        word-break: initial;
-        /* border-radius: 4px; */
-        border-collapse: collapse;
-        border-spacing: 0;
         width: 100%;
+        border-collapse: collapse; /* 合并边框 */
+        margin: 16px 0;
+        display: block;
+        overflow-x: auto; /* 在内容过长时显示水平滚动条 */
+        border: 1px solid #dfe2e5; /* 整体表格的浅灰色外边框 */
+        border-radius: 6px; /* 为整个表格添加圆角 */
+        font-size: 14px;
+    }
+
+    table thead {
+        background-color: #f6f8fa; /* 表头使用更清晰的浅灰色背景 */
     }
 
     table tr {
-        border-top: 1px solid #2196f31f;
-        margin: 0;
-        padding: 0;
+        border-top: 1px solid #dfe2e5; /* 行之间的分隔线 */
     }
 
-    table tr:nth-child(2n),
-    thead {
-        background-color: #fafafa;
+    table th,
+    table td {
+        padding: 10px 14px; /* 增加单元格内边距，提升可读性 */
+        border: 1px solid #dfe2e5; /* 统一单元格边框为中性浅灰色 */
+        text-align: left; /* 文字左对齐 */
     }
 
-    table tr th {
-        font-weight: bold;
-        border: 1px solid #9b9b9b3b;
-        border-bottom: 0;
-        text-align: left;
-        margin: 0;
-        padding: 6px 13px;
+    table th {
+        font-weight: 600; /* 表头文字加粗 */
+        color: #24292f; /* 表头文字使用深灰色，而不是纯黑 */
     }
 
-    table tr td {
-        border: 1px solid #9b9b9b3b;
-        text-align: left;
-        margin: 0;
-        padding: 6px 13px;
+    table td {
+        color: #333333; /* 表格内容文字颜色 */
     }
 
-    table tr th:first-child,
-    table tr td:first-child {
-        margin-top: 0;
+    /* 斑马条纹：让奇数行和偶数行背景色不同，提高可读性 */
+    table tbody tr:nth-child(even) {
+        background-color: #f6f8fa; /* 偶数行背景色 */
     }
 
-    table tr th:last-child,
-    table tr td:last-child {
-        margin-bottom: 0;
+    table tbody tr:nth-child(odd) {
+        background-color: #ffffff; /* 奇数行背景色为纯白 */
     }
 
 

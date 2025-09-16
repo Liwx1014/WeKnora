@@ -2285,7 +2285,7 @@ const detectEmbeddingDimension = async () => {
 .initialization-container {
     background: transparent;
     padding: 0;
-    
+  
     .init-layout {
         display: grid;
         grid-template-columns: 220px 1fr;
